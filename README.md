@@ -1,6 +1,6 @@
 CAL
 ===
-Require: Julia, dReal
+Require: dReal binary
 
 
 
