@@ -17,22 +17,22 @@ public:
 	~ast();
 
 private:
-	bool			terminal;
-	symbol			root;
-	ast**			leaves; //array of pointers to ASTs
-	unsigned		degree;
-	unsigned		height;
-	string			flatname; //flattened string of the whole tree
+	bool	terminal;
+	symbol	root;
+	ast**	leaves; //array of pointers to ASTs
+	unsigned	degree;
+	unsigned	height;
+	string	flatname; //flattened string of the whole tree
 
 public:
-	inline symbol		getroot() 		{ return root; }
-	inline ast**		getleaves() 	{ return leaves; }
-	inline unsigned		getdegree()		{ return degree; }
-	inline unsigned 	getheight()		{ return height; }
-	inline bool			isterminal() 	{ return terminal; }
-	inline string		getflatname()	{ return flatname; }
+	inline symbol	getroot() 		{ return root; }
+	inline ast**	getleaves() 	{ return leaves; }
+	inline unsigned	getdegree()		{ return degree; }
+	inline unsigned	getheight()		{ return height; }
+	inline bool		isterminal() 	{ return terminal; }
+	inline string	getflatname()	{ return flatname; }
 
-	inline void			setterminal()	{ terminal = true; }
+	inline void	setterminal()	{ terminal = true; }
 };
 
 #endif

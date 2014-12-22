@@ -58,7 +58,12 @@ int main() {
 			reply("You took a normal exit.");
 			break;
 		}
-		else if (command.find("sketch ") == 0) {
+		else if (command.find("symbol ") == 0) {
+			//seperate types?...
+		}
+		else if (command.find("function ") == 0
+				|| command.find("formula ") ==0
+				|| command.find("process ") == 0) {
 			command = open2end(command);
 		}
 		//event handlers 
