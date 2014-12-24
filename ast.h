@@ -25,12 +25,12 @@ private:
 	string	flatname; //flattened string of the whole tree
 
 public:
-	inline symbol	getroot() 		{ return root; }
-	inline ast**	getleaves() 	{ return leaves; }
-	inline unsigned	getdegree()		{ return degree; }
-	inline unsigned	getheight()		{ return height; }
-	inline bool		isterminal() 	{ return terminal; }
-	inline string	getflatname()	{ return flatname; }
+	inline symbol	get_root()	{ return root; }
+	inline ast**	get_leaves()	{ return leaves; }
+	inline unsigned	get_degree()	{ return degree; }
+	inline unsigned	get_height()	{ return height; }
+	inline bool		is_terminal()	{ return terminal; }
+	inline string	get_flatname()	{ return flatname; }
 
 	inline void	setterminal()	{ terminal = true; }
 };

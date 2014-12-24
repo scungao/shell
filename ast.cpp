@@ -1,11 +1,12 @@
 #include "ast.h"
 
+
 ast::ast(symbol s)
 	:	root(s), terminal(true), 
 		degree(0), height(0), leaves(NULL) 
 {
 	try{
-		flatname = s.getname();
+		flatname = s.get_name();
 	}
 	catch(exception& e){
 		cerr<<"AST: error on base. "<<e.what()<<endl;
@@ -16,10 +17,11 @@ ast::ast(symbol s, ast** l_array, unsigned d)
 	:	root(s), terminal(false), degree(d), leaves(l_array)
 {
 	try{
-		flatname = s.getname();
+		flatname = s.get_name();
 	}
 	catch(exception& e){
-		cerr<<"AST: error on n-ary induction. "<<e.what()<<endl;
+		cerr<<"AST: error on n-ary induction. "
+			<<e.what()<<endl;
 	}
 	flatname += "(";
 	height = 0;
@@ -39,10 +41,11 @@ ast::ast(symbol s, ast* l)
 	:	root(s), terminal(false), degree(1) 
 {
 	try{
-		flatname = s.getname();
+		flatname = s.get_name();
 	}
 	catch(exception& e){
-		cerr<<"AST: error on unary induction. "<<e.what()<<endl;
+		cerr<<"AST: error on unary induction. "
+			<<e.what()<<endl;
 	}
 
 	ast*	l_array[1];
@@ -61,10 +64,11 @@ ast::ast(symbol s, ast* l1, ast* l2)
 	:	root(s), terminal(false), degree(2) 
 {
 	try{
-		flatname = s.getname();
+		flatname = s.get_name();
 	}
 	catch(exception& e){
-		cerr<<"AST: error on binary induction. "<<e.what()<<endl;
+		cerr<<"AST: error on binary induction. "
+			<<e.what()<<endl;
 	}
 
 	ast*	l_array[2];
@@ -89,10 +93,11 @@ ast::ast(symbol s, ast* l1, ast* l2, ast* l3)
 	:	root(s), terminal(false), degree(3) 
 {
 	try{
-		flatname = s.getname();
+		flatname = s.get_name();
 	}
 	catch(exception& e){
-		cerr<<"AST: error on ternary induction. "<<e.what()<<endl;
+		cerr<<"AST: error on ternary induction. "
+			<<e.what()<<endl;
 	}
 
 	ast*	l_array[3];

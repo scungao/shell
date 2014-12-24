@@ -13,10 +13,10 @@ public:
 	~symbol();
 
 private:
-	string	name;
+	const string	name;
 
 public:
-	inline string	getname() { return name; }
+	inline string	get_name() { return name; }
 };
 
 #endif
