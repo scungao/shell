@@ -1,28 +1,25 @@
 #include "ast.h"
+#include <iostream>
+#include <string>
 
+using namespace std;
 
-ast::ast(symbol s)
-	:	root(s), terminal(true), 
-		degree(0), height(0), leaves(NULL) 
+ast::ast(node* s)
+	:	parent(s), terminal(true), 
+		degree(0), height(0), children(NULL) 
 {
 	try{
-		flatname = s.get_name();
+		flatname = s -> get_name();
 	}
 	catch(exception& e){
-		cerr<<"AST: error on base. "<<e.what()<<endl;
+		cout<<"AST: error on base. "<<e.what()<<endl;
 	}
 }
 
-ast::ast(symbol s, ast** l_array, unsigned d)
-	:	root(s), terminal(false), degree(d), leaves(l_array)
-{
-	try{
-		flatname = s.get_name();
-	}
-	catch(exception& e){
-		cerr<<"AST: error on n-ary induction. "
-			<<e.what()<<endl;
-	}
+ast::ast(node* s, ast** l_array, unsigned d)
+	:	parent(s), terminal(false), degree(d), children(l_array)
+{		
+	flatname = s->get_name();
 	flatname += "(";
 	height = 0;
 	for (int i=0; i<d; i++) {
@@ -34,23 +31,17 @@ ast::ast(symbol s, ast** l_array, unsigned d)
 	flatname.pop_back(); //delete trailing ","
 	flatname += ")";
 	height += 1;
-
 }
 
-ast::ast(symbol s, ast* l)
-	:	root(s), terminal(false), degree(1) 
+ast::ast(node* s, ast* l)
+	:	parent(s), terminal(false), degree(1) 
 {
-	try{
-		flatname = s.get_name();
-	}
-	catch(exception& e){
-		cerr<<"AST: error on unary induction. "
-			<<e.what()<<endl;
-	}
+	flatname = s->get_name();
 
 	ast*	l_array[1];
 	l_array[0] = l;
-	leaves = l_array;
+
+	children = l_array;
 
 	flatname += "(";
 	flatname += l_array[0]->flatname;
@@ -60,21 +51,16 @@ ast::ast(symbol s, ast* l)
 }
 
 
-ast::ast(symbol s, ast* l1, ast* l2)
-	:	root(s), terminal(false), degree(2) 
+ast::ast(node* s, ast* l1, ast* l2)
+	:	parent(s), terminal(false), degree(2) 
 {
-	try{
-		flatname = s.get_name();
-	}
-	catch(exception& e){
-		cerr<<"AST: error on binary induction. "
-			<<e.what()<<endl;
-	}
+	flatname = s->get_name();
 
 	ast*	l_array[2];
 	l_array[0] = l1;
 	l_array[1] = l2;
-	leaves = l_array;
+
+	children = l_array;
 
 	flatname += "(";
 	height = 0;
@@ -89,23 +75,17 @@ ast::ast(symbol s, ast* l1, ast* l2)
 	height += 1;
 }
 
-ast::ast(symbol s, ast* l1, ast* l2, ast* l3)
-	:	root(s), terminal(false), degree(3) 
+ast::ast(node* s, ast* l1, ast* l2, ast* l3)
+	:	parent(s), terminal(false), degree(3) 
 {
-	try{
-		flatname = s.get_name();
-	}
-	catch(exception& e){
-		cerr<<"AST: error on ternary induction. "
-			<<e.what()<<endl;
-	}
-
+	flatname = s->get_name();
+	
 	ast*	l_array[3];
 	l_array[0] = l1;
 	l_array[1] = l2;
 	l_array[2] = l3;
 
-	leaves = l_array;
+	children = l_array;
 
 	flatname += "(";
 	height = 0;

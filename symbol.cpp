@@ -1,4 +1,6 @@
-#include "symbol.h"
+//#include "symbol.h"
 
-symbol::symbol(string s) : name(s) {}
-symbol::~symbol() {}
+//symbol::symbol(string s, s_type t, unsigned a) : 
+//	name(s), type(t), arity(a) {}
+
+//symbol::~symbol() {}
