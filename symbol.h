@@ -32,7 +32,6 @@ class symbol {
 	double		upper;
 	double		lower;	
 	int			prec; //precedence
-
 public:
 	inline symbol(string s, s_type t, unsigned a)
 		:name(s), type(t), arity(a) {}
