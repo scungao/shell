@@ -51,7 +51,7 @@ string parser::collect_variable(istream& stream, char& cc) {
 	if ( new_var != NULL ) { //variable has been declared
 		new_var -> set_stype(symbol_type);
 		new_var -> set_dtype(domain_type);
-		message << "Variable redeclared: ";
+		message << "Symbol redeclared: ";
 	}
 	else {
 		new_var = new symbol(name, symbol_type, 0); //0 is arity
@@ -82,28 +82,66 @@ string parser::collect_process(istream& stream, char& cc) {
 	string 	name;
 	s_type	symbol_type;
 	d_type	domain_type;
-	symbol*	new_var;	
+	symbol*	new_process;	
 	string	buffer;
 	vector<string>	fields;
 	stringstream message; //return message
 
-	do { //collect the fields. Expected input: name in:x,y out:
+	//get head: "process name (dt = 0.1; states: x, y; params: a, b)"
+	do {
 		stream.get(cc);
-		if ((isalnum(cc)||ispunct(cc))&& cc!=':' && cc!=',')//need symbol table now
+		if ( (isalnum(cc)||ispunct(cc)) && cc!=':' && cc!=',' 
+			&& cc!= '(' && cc!= ')' && cc!= ';' && cc!= '=')//need symbol table now
 			buffer += cc;
+		else if (cc == ';' || cc == ':' ) {
+			if (!buffer.empty())
+				fields.push_back(buffer);
+			buffer.clear();
+			buffer+=cc;
+			fields.push_back(buffer);
+			buffer.clear();
+		}
 		else {
 			if (!buffer.empty())
 				fields.push_back(buffer);
 			buffer.clear();
 		}
 	} while (cc != '\n');
+	//fields should be like: name dt 0.1 ; x y ; a
 
+	//for (int i=0; i<fields.size(); i++) cout<<i<<fields[i];
 
+	//add in symbol list
+	name = fields[0];
+	symbol_type = process;
+	new_process = symbol_table -> locate_symbol(name);
+	if ( new_process != NULL ) { //variable has been declared
+		new_process -> set_stype(symbol_type);
+		new_process -> set_dtype(domain_type);
+		message << "Symbol redeclared: ";
+	}
+	else {
+		new_process = new symbol(name, symbol_type,1);//1 is arity 
+		symbol_table -> add(new_process);
+		message << "New process: ";
+	}	
+	message << name;
 
+	//collect period and variable info
 
-
-	return "Process defined.";
+	return message.str();
 }
+
+string parser::collect_body(istream& stream, char& cc) {
+	int level = 1;
+	//get body
+	do {
+		level -= 1; 
+	} while (level > 0);
+
+	return "parsed";
+}
+
 
 
 

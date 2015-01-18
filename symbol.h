@@ -9,11 +9,11 @@ using namespace std;
 
 //symbol type
 enum s_type {
-	function,
 	constant,
 	variable,
 	relation,
-	connective
+	connective,
+	process,
 };
 
 //domain type
@@ -26,16 +26,18 @@ enum d_type {
 
 class symbol {
 	const string	name;
-	s_type		type;
+	s_type	type;
 	unsigned	arity;	
-	d_type		domain;	
-	double		upper;
-	double		lower;	
-	int			prec; //precedence
+	d_type	domain;	
+	double	upper;
+	double	lower;	
+	int	prec; //precedence
 public:
+	inline symbol(string s, s_type t)
+		:name(s), type(t) {}
 	inline symbol(string s, s_type t, unsigned a)
 		:name(s), type(t), arity(a) {}
-	inline symbol(string s, s_type t, int a, int p)
+	inline symbol(string s, s_type t, unsigned a, int p)
 		:name(s), type(t), arity(a), prec(p) {}
 	inline ~symbol() {}
 	inline string	get_name()	{ return name; }
@@ -54,11 +56,5 @@ public:
 	inline void set_upper (double ub) { upper = ub; }
 	inline void set_lower (double lb) { lower = lb; }
 };
-
-
-
-
-
-
 
 #endif

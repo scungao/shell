@@ -4,7 +4,7 @@
 
 using namespace std;
 
-ast::ast(node* s)
+ast::ast(symbol* s)
 	:	parent(s), terminal(true), 
 		degree(0), height(0), children(NULL) 
 {
@@ -16,7 +16,7 @@ ast::ast(node* s)
 	}
 }
 
-ast::ast(node* s, ast** l_array, unsigned d)
+ast::ast(symbol* s, ast** l_array, unsigned d)
 	:	parent(s), terminal(false), degree(d), children(l_array)
 {		
 	flatname = s->get_name();
@@ -33,7 +33,7 @@ ast::ast(node* s, ast** l_array, unsigned d)
 	height += 1;
 }
 
-ast::ast(node* s, ast* l)
+ast::ast(symbol* s, ast* l)
 	:	parent(s), terminal(false), degree(1) 
 {
 	flatname = s->get_name();
@@ -51,7 +51,7 @@ ast::ast(node* s, ast* l)
 }
 
 
-ast::ast(node* s, ast* l1, ast* l2)
+ast::ast(symbol* s, ast* l1, ast* l2)
 	:	parent(s), terminal(false), degree(2) 
 {
 	flatname = s->get_name();
@@ -75,7 +75,7 @@ ast::ast(node* s, ast* l1, ast* l2)
 	height += 1;
 }
 
-ast::ast(node* s, ast* l1, ast* l2, ast* l3)
+ast::ast(symbol* s, ast* l1, ast* l2, ast* l3)
 	:	parent(s), terminal(false), degree(3) 
 {
 	flatname = s->get_name();

@@ -1,26 +1,30 @@
 #ifndef AST_H
 #define AST_H
 
-#include "node.h"
+#include "symbol.h"
 #include <string>
+#include <vector>
 
 //this ast is more general than the usual one
 class ast {
 	bool	terminal;
-	node*	parent;
-	ast**	children; //array of pointers to ASTs
+	symbol*		parent;
+	ast**		children; //array of pointers to ASTs
 	unsigned	degree;
 	unsigned	height;
 	string	flatname; //flattened string of the whole tree
+	vector<symbol*>		variables;	//variables used anywhere downwards
+	vector<symbol*>		parameters;	//parameters used anywhere downwards
 public:
-	ast(node*); // terminal leaf
- 	ast(node*, ast**, unsigned); 
-	ast(node*, ast*); //unary tree
-	ast(node*, ast*, ast*); //binary tree
-	ast(node*, ast*, ast*, ast*); //ternary tree
+	ast(symbol*); // terminal leaf
+ 	ast(symbol*, ast**, unsigned); 
+	ast(symbol*, ast*); //unary tree
+	ast(symbol*, ast*, ast*); //binary tree
+	ast(symbol*, ast*, ast*, ast*); //ternary tree
 	~ast();
-	inline node*	get_parent()	{ return parent; }
-	inline ast**	get_children()	{ return children; }
+	inline symbol*	get_parent()	{ return parent; }
+//	inline vector<ast*> *	get_children()	{ return &children; }
+	inline ast* 	get_child(int i)	{ return children[i]; }
 	inline unsigned	get_degree()	{ return degree; }
 	inline unsigned	get_height()	{ return height; }
 	inline bool		is_terminal()	{ return terminal; }
