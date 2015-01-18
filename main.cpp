@@ -27,7 +27,8 @@ int main() {
 			cout<<"\033[36m"<<"cda$ "<<"\033[0m";
 		}
 
-		if ( command.compare("quit") == 0 ) {
+		if ( command.compare("quit") == 0 || command.compare("exit") == 0 
+				|| command.compare("bye") ==0 ) {
 			break;
 		}
 		else if ( command.compare("variable") == 0 ) {

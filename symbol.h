@@ -14,6 +14,7 @@ enum s_type {
 	relation,
 	connective,
 	process,
+	formula
 };
 
 //domain type
@@ -27,7 +28,7 @@ enum d_type {
 class symbol {
 	const string	name;
 	s_type	type;
-	unsigned	arity;	
+	int	arity;	
 	d_type	domain;	
 	double	upper;
 	double	lower;	
@@ -35,14 +36,14 @@ class symbol {
 public:
 	inline symbol(string s, s_type t)
 		:name(s), type(t) {}
-	inline symbol(string s, s_type t, unsigned a)
+	inline symbol(string s, s_type t, int a)
 		:name(s), type(t), arity(a) {}
-	inline symbol(string s, s_type t, unsigned a, int p)
+	inline symbol(string s, s_type t, int a, int p)
 		:name(s), type(t), arity(a), prec(p) {}
 	inline ~symbol() {}
 	inline string	get_name()	{ return name; }
 	inline s_type	get_stype()	{ return type; }
-	inline unsigned	get_arity()	{ return arity; }	
+	inline int	get_arity()	{ return arity; }	
 	inline void set_stype(s_type st) { type = st; }
 	inline void set_dtype(d_type dt) { domain = dt; }
 	inline double get_upper ()	{

@@ -6,7 +6,7 @@ using namespace std;
 
 ast::ast(symbol* s)
 	:	parent(s), terminal(true), 
-		degree(0), height(0), children(NULL) 
+		degree(0), height(0) 
 {
 	try{
 		flatname = s -> get_name();
@@ -16,38 +16,15 @@ ast::ast(symbol* s)
 	}
 }
 
-ast::ast(symbol* s, ast** l_array, unsigned d)
-	:	parent(s), terminal(false), degree(d), children(l_array)
-{		
-	flatname = s->get_name();
-	flatname += "(";
-	height = 0;
-	for (int i=0; i<d; i++) {
-		if ( l_array[i]->height > height ) 
-			height = l_array[i]->height;
-		flatname += l_array[i]->flatname;
-		flatname += ",";
-	}
-	flatname.pop_back(); //delete trailing ","
-	flatname += ")";
-	height += 1;
-}
-
 ast::ast(symbol* s, ast* l)
 	:	parent(s), terminal(false), degree(1) 
 {
 	flatname = s->get_name();
-
-	ast*	l_array[1];
-	l_array[0] = l;
-
-	children = l_array;
-
+	children.push_back(l);
 	flatname += "(";
-	flatname += l_array[0]->flatname;
+	flatname += l->flatname;
 	flatname += ")";
-
-	height = (l_array[0]->height)+1;
+	height = (children[0]->height)+1;
 }
 
 
@@ -56,18 +33,15 @@ ast::ast(symbol* s, ast* l1, ast* l2)
 {
 	flatname = s->get_name();
 
-	ast*	l_array[2];
-	l_array[0] = l1;
-	l_array[1] = l2;
-
-	children = l_array;
+	children.push_back(l1);
+	children.push_back(l2);
 
 	flatname += "(";
 	height = 0;
 	for (int i=0; i<2; i++) {
-		if ( l_array[i]->height > height ) 
-			height = l_array[i]->height;
-		flatname += l_array[i]->flatname;
+		if ( children[i]->height > height ) 
+			height = children[i]->height;
+		flatname += children[i]->flatname;
 		flatname += ",";
 	}
 	flatname.pop_back(); //delete trailing ","
@@ -80,19 +54,16 @@ ast::ast(symbol* s, ast* l1, ast* l2, ast* l3)
 {
 	flatname = s->get_name();
 	
-	ast*	l_array[3];
-	l_array[0] = l1;
-	l_array[1] = l2;
-	l_array[2] = l3;
-
-	children = l_array;
+	children.push_back(l1);
+	children.push_back(l2);
+	children.push_back(l3);
 
 	flatname += "(";
 	height = 0;
 	for (int i=0; i<3; i++) {
-		if ( l_array[i]->height > height ) 
-			height = l_array[i]->height;
-		flatname += l_array[i]->flatname;
+		if ( children[i]->height > height ) 
+			height = children[i]->height;
+		flatname += children[i]->flatname;
 		flatname += ",";
 	}
 	flatname.pop_back(); //delete trailing ","

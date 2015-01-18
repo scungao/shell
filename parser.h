@@ -19,7 +19,7 @@ public:
 	parser(dictionary*);
 	~parser();
 
-	inline unsigned symbol_table_size()	
+	inline int symbol_table_size()	
 		{ return symbol_table -> get_size(); }
 	string	collect_variable(istream&, char&);
 	string	collect_constant(istream&, char&);
