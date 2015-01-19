@@ -203,18 +203,55 @@ string parser::collect_process(istream& stream, char& cc) {
 		return "Syntax example: process plant (dt = 0.1; states: x,y; params: z)";
 	}
 
-
-	//collect period and variable info
+	message<<collect_body(stream, cc, root, 0);
 
 	return message.str();
 }
 
-string parser::collect_body(istream& stream, char& cc) {
-	int level = 1;
-	//get body
+string parser::collect_body(istream& stream, char& cc, ast* head, int indent) { 
+	string	buffer;
+	vector<symbol*>	lexed_stream;
+	ast*	root;
+	char	cc2;
+	symbol*		word;
+	symbol*		word_temp;
+	bool	checked;
+	stringstream	message; //return message
+
 	do {
-		level -= 1; 
-	} while (level > 0);
+		stream.get(cc);
+		if ( cc =='\n') continue;
+		buffer+= cc;
+
+		word = symbol_table->locate_symbol(buffer);
+
+		if (word!= NULL) { //partial match, check if it's full
+			stream.get(cc); //look ahead
+			string temp = buffer;
+			temp += cc;
+			word_temp = symbol_table->locate_symbol(temp);
+			if ( word_temp != NULL) {
+				checked = true; //mark that it has been parsed
+				buffer = temp;
+				break;
+			} 
+			else {
+				checked = false;
+				lexed_stream.push_back(word);
+			}
+		}
+		else { //no match, check if already matched before
+			if (checked) {
+				assert(word_temp!=NULL);
+				lexed_stream.push_back(word_temp);
+				buffer.clear();
+				buffer += cc;
+			}
+			//no match, and previously no match. keep going
+		}
+	} while (cc!='\n');
+
+	
 
 	return "parsed";
 }
