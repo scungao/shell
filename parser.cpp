@@ -205,12 +205,12 @@ string parser::collect_process(istream& stream, char& cc) {
 
 	ast* child = new ast();
 	root -> add_child(child);
-	message<<collect_body(stream, cc, child, 0);
+	message<<collect_body(stream, cc, child);
 
 	return message.str();
 }
 
-string parser::collect_body(istream& stream, char& cc, ast* head, int indent) { 
+string parser::collect_body(istream& stream, char& cc, ast* head) { 
 	string	buffer;
 	vector<symbol*>	token_stream;
 	symbol*		token;
@@ -252,38 +252,35 @@ string parser::collect_body(istream& stream, char& cc, ast* head, int indent) {
 	} while (cc!='\n');
 
 	string read_token_name = token_stream[0]->get_name();
-	int indent_holder = indent;
 
-	if ( read_token_name == "end") {
-		if (indent == indent_holder) {
-			return "parsed";
-		}
-		else 
-			return "Early end. Not parsed.";
+	if ( read_token_name == "end") {	
+		return "parsed";
 	}
 	else if ( read_token_name.compare("if")==0) {
-		indent++;
 		head -> set_head_symbol(symbol_table->locate_symbol("ite"));
 
 		ast* child1 = parse_formula(token_stream, 1); //offset=1
 		head -> add_child(child1);
 
 		ast* child2 = new ast();
-		collect_body(stream, cc, child2, indent);
+		collect_body(stream, cc, child2);
 	}
 	else if ( read_token_name.compare("else")==0 ) { 
-		if (indent == indent_holder)
-			return "Else doesn't match If. Not parsed.";
-		else {
-			assert(head->get_head_name().compare("ite")==0);
+		if (head->get_parent()->get_parent()
+				->get_head_name().compare("ite")==0) {
+			//normal case: two levels up is ite
 			ast* child3 = new ast();
-			collect_body(stream, cc, child3, indent);
+			//go up to the third arm of ite
+			head->get_parent()->get_parent()->add_child(child3);
+			collect_body(stream, cc, child3);
 		}
+		else {
+			return "Something is wrong"; 
+		}			
 	}
 	else { //add sequence
-		assert(head -> get_parent() != NULL);
 		if (head->get_head_symbol()->get_name().compare("seq") == 0)
-			head = head -> get_parent(); //flatten sequences
+			head = head -> get_parent(); //flatten sequences to one level
 		else
 			head -> set_head_symbol(symbol_table->locate_symbol("seq"));		
 
@@ -292,10 +289,10 @@ string parser::collect_body(istream& stream, char& cc, ast* head, int indent) {
 
 		ast* child2 = new ast();
 		head -> add_child(child2); //right child
-		collect_body(stream, cc, child2, indent);
+		collect_body(stream, cc, child2);
 	}
-
-	return "parsed";
+	//only proper if ended with end
+	return "Not properly defined";
 }
 
 ast* parser::parse_assignment(vector<symbol*>& tokens, int offset) {
