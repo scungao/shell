@@ -25,7 +25,8 @@ public:
 	string	collect_constant(istream&, char&);
 	string	collect_process(istream&, char&);
 	string	collect_body(istream&, char&, ast*, int);
-
+	ast*	parse_assignment(vector<symbol*>&, int);
+	ast*	parse_formula(vector<symbol*>&, int);
 	//ast* parse(string);
 };
 

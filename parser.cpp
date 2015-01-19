@@ -203,18 +203,18 @@ string parser::collect_process(istream& stream, char& cc) {
 		return "Syntax example: process plant (dt = 0.1; states: x,y; params: z)";
 	}
 
-	message<<collect_body(stream, cc, root, 0);
+	ast* child = new ast();
+	root -> add_child(child);
+	message<<collect_body(stream, cc, child, 0);
 
 	return message.str();
 }
 
 string parser::collect_body(istream& stream, char& cc, ast* head, int indent) { 
 	string	buffer;
-	vector<symbol*>	lexed_stream;
-	ast*	root;
-	char	cc2;
-	symbol*		word;
-	symbol*		word_temp;
+	vector<symbol*>	token_stream;
+	symbol*		token;
+	symbol*		token_temp;
 	bool	checked;
 	stringstream	message; //return message
 
@@ -223,27 +223,27 @@ string parser::collect_body(istream& stream, char& cc, ast* head, int indent) {
 		if ( cc =='\n') continue;
 		buffer+= cc;
 
-		word = symbol_table->locate_symbol(buffer);
+		token = symbol_table->locate_symbol(buffer);
 
-		if (word!= NULL) { //partial match, check if it's full
+		if (token!= NULL) { //partial match, check if it's full
 			stream.get(cc); //look ahead
 			string temp = buffer;
 			temp += cc;
-			word_temp = symbol_table->locate_symbol(temp);
-			if ( word_temp != NULL) {
+			token_temp = symbol_table->locate_symbol(temp);
+			if ( token_temp != NULL) { //still partial match possibly
 				checked = true; //mark that it has been parsed
 				buffer = temp;
 				break;
 			} 
-			else {
+			else { //matched
 				checked = false;
-				lexed_stream.push_back(word);
+				token_stream.push_back(token);
 			}
 		}
 		else { //no match, check if already matched before
 			if (checked) {
-				assert(word_temp!=NULL);
-				lexed_stream.push_back(word_temp);
+				assert(token_temp!=NULL);
+				token_stream.push_back(token_temp);
 				buffer.clear();
 				buffer += cc;
 			}
@@ -251,10 +251,67 @@ string parser::collect_body(istream& stream, char& cc, ast* head, int indent) {
 		}
 	} while (cc!='\n');
 
-	
+	string read_token_name = token_stream[0]->get_name();
+	int indent_holder = indent;
+
+	if ( read_token_name == "end") {
+		if (indent == indent_holder) {
+			return "parsed";
+		}
+		else 
+			return "Early end. Not parsed.";
+	}
+	else if ( read_token_name.compare("if")==0) {
+		indent++;
+		head -> set_head_symbol(symbol_table->locate_symbol("ite"));
+
+		ast* child1 = parse_formula(token_stream, 1); //offset=1
+		head -> add_child(child1);
+
+		ast* child2 = new ast();
+		collect_body(stream, cc, child2, indent);
+	}
+	else if ( read_token_name.compare("else")==0 ) { 
+		if (indent == indent_holder)
+			return "Else doesn't match If. Not parsed.";
+		else {
+			assert(head->get_head_name().compare("ite")==0);
+			ast* child3 = new ast();
+			collect_body(stream, cc, child3, indent);
+		}
+	}
+	else { //add sequence
+		assert(head -> get_parent() != NULL);
+		if (head->get_head_symbol()->get_name().compare("seq") == 0)
+			head = head -> get_parent(); //flatten sequences
+		else
+			head -> set_head_symbol(symbol_table->locate_symbol("seq"));		
+
+		ast* child1 = parse_assignment(token_stream, 0);
+		head -> add_child(child1); //left child
+
+		ast* child2 = new ast();
+		head -> add_child(child2); //right child
+		collect_body(stream, cc, child2, indent);
+	}
 
 	return "parsed";
 }
+
+ast* parser::parse_assignment(vector<symbol*>& tokens, int offset) {
+	ast* head = new ast();
+	return head;
+} 
+
+ast* parser::parse_formula(vector<symbol*>& tokens, int offset) {
+	ast* head = new ast();
+	return head;
+} 
+
+
+
+
+
 
 
 

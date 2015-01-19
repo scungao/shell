@@ -3,7 +3,7 @@ FLAGS = -c
 INCUDE = -I/usr/local/include/boost/
 all: cal 
 cal: main ast dictionary parser
-	$(CC) main.o ast.o dictionary.o parser.o -o cda
+	$(CC) -Wall main.o ast.o dictionary.o parser.o -o cda
 main: main.cpp
 	$(CC) $(FLAGS) main.cpp
 ast: ast.cpp 

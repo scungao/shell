@@ -5,8 +5,8 @@
 using namespace std;
 
 ast::ast(symbol* s)
-	:	parent(s), terminal(true), 
-		degree(0), height(0) 
+	:	head_symbol(s), terminal(true), 
+		degree(0), height(0), parent(NULL)
 {
 	try{
 		flatname = s -> get_name();
@@ -17,7 +17,7 @@ ast::ast(symbol* s)
 }
 
 ast::ast(symbol* s, ast* l)
-	:	parent(s), terminal(false), degree(1) 
+	:	head_symbol(s), terminal(false), degree(1), parent(NULL)
 {
 	flatname = s->get_name();
 	children.push_back(l);
@@ -29,7 +29,7 @@ ast::ast(symbol* s, ast* l)
 
 
 ast::ast(symbol* s, ast* l1, ast* l2)
-	:	parent(s), terminal(false), degree(2) 
+	:	head_symbol(s), terminal(false), degree(2), parent(NULL)
 {
 	flatname = s->get_name();
 
@@ -50,7 +50,7 @@ ast::ast(symbol* s, ast* l1, ast* l2)
 }
 
 ast::ast(symbol* s, ast* l1, ast* l2, ast* l3)
-	:	parent(s), terminal(false), degree(3) 
+	:	head_symbol(s), terminal(false), degree(3), parent(NULL) 
 {
 	flatname = s->get_name();
 	
