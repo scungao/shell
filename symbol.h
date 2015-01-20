@@ -13,7 +13,7 @@ enum s_type {
 	variable,
 	relation,
 	connective,
-	cfunction, //"computable function"
+	sfunction, //"signature function" to avoid conflict with keyword
 	aux,
 	label //labels can be given to processes, formulas, etc. 
 };
@@ -57,6 +57,7 @@ public:
 	}
 	inline void set_upper (double ub) { upper = ub; }
 	inline void set_lower (double lb) { lower = lb; }
+	inline bool match (string s) { return (name.compare(s) == 0);}
 };
 
 #endif

@@ -11,10 +11,10 @@ dictionary::~dictionary() {
 	//}
 	symbol_table.clear();
 
-	add(new symbol("+", cfunction, 2));
-	add(new symbol("-", cfunction, 2));
-	add(new symbol("*", cfunction, 2));
-	add(new symbol("/", cfunction, 2));
+	add(new symbol("+", sfunction, 2));
+	add(new symbol("-", sfunction, 2));
+	add(new symbol("*", sfunction, 2));
+	add(new symbol("/", sfunction, 2));
 
 	add(new symbol("&&", connective));
 	add(new symbol("||", connective));
@@ -30,6 +30,7 @@ dictionary::~dictionary() {
 	add(new symbol("(", aux, 0));
 	add(new symbol(")", aux, 0));
 
+	add(new symbol("d/dt", sfunction, 1));
 }
 
 symbol* dictionary::locate_symbol(string name) {

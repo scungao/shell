@@ -31,6 +31,9 @@ string parser::collect_variable(istream& stream, char& cc) {
 	if (fields.size() < 2) 
 		return "Syntax: variable name type [lb, ub].";
 
+	if (!isalpha(fields[0][0])) 
+		return "Variable name should start with a letter";
+
 	name = fields[0];
 	symbol_type = variable;
 	if (fields[1].compare("real") == 0 || fields[1].compare("float") == 0) {
@@ -301,8 +304,7 @@ string parser::collect_body(istream& stream, char& cc, ast* head) {
 		collect_body(stream, cc, child2);
 	}
 	else if ( read_token_name.compare("else")==0 ) { 
-		if (head->get_parent()->get_parent()
-				->get_head_name().compare("ite")==0) {
+		if (head->get_parent()->get_parent()->get_head_symbol()->match("ite")) {
 			//normal case: two levels up is ite
 			ast* child3 = new ast();
 			//go up to the third arm of ite
@@ -314,7 +316,7 @@ string parser::collect_body(istream& stream, char& cc, ast* head) {
 		}			
 	}
 	else { //add sequence
-		if (head->get_head_symbol()->get_name().compare("seq") == 0)
+		if (head->get_head_symbol()->match("seq"))
 			head = head -> get_parent(); //flatten sequences to one level
 		else
 			head -> set_head_symbol(symbol_table->locate_symbol("seq"));		
@@ -331,7 +333,17 @@ string parser::collect_body(istream& stream, char& cc, ast* head) {
 }
 
 ast* parser::parse_assignment(vector<symbol*>& tokens, int offset) {
+
+	int loc_equal;
+	for (loc_equal = offset; loc_equal<tokens.size(); loc_equal++) {
+		if (tokens[loc_equal]->match("="))
+			break; //not doing any sanity check
+	}
+
 	ast* head = new ast();
+	head -> set_head_symbol(symbol_table->locate_symbol("="));
+	head -> set_head_type(statement);
+
 	return head;
 } 
 
