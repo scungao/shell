@@ -17,6 +17,7 @@ enum a_type {
 //this ast is more general than the usual one
 class ast {
 	bool	terminal;
+	a_type	head_type;
 	symbol*		head_symbol;
 	ast*		parent;
 	vector<ast*>		children; //array of pointers to ASTs
@@ -33,6 +34,8 @@ public:
 	ast(symbol*, ast*, ast*); //binary tree
 	ast(symbol*, ast*, ast*, ast*); //ternary tree
 	~ast();
+	inline void set_head_type(a_type a) {head_type = a;}
+	inline a_type get_head_type() { return head_type; }
 	inline symbol*	get_head_symbol()	{ return head_symbol; }
 	inline string	get_head_name()	
 		{ return head_symbol->get_name(); }

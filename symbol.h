@@ -13,6 +13,8 @@ enum s_type {
 	variable,
 	relation,
 	connective,
+	cfunction, //"computable function"
+	aux,
 	label //labels can be given to processes, formulas, etc. 
 };
 
@@ -25,7 +27,7 @@ enum d_type {
 };
 
 class symbol {
-	const string	name;
+	const string name;
 	s_type	type;
 	int	arity;	
 	d_type	domain;	

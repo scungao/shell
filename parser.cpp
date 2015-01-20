@@ -1,5 +1,6 @@
 #include <iostream>
 #include "parser.h"
+#include <regex>
 
 parser::parser(dictionary* d): symbol_table(d) {
 
@@ -80,7 +81,6 @@ string parser::collect_constant(istream& stream, char& cc) {
 
 string parser::collect_process(istream& stream, char& cc) {
 	string 	name;
-	s_type	symbol_type;
 	symbol*	new_process;	
 	string	buffer;
 	vector<string>	fields;
@@ -117,22 +117,21 @@ string parser::collect_process(istream& stream, char& cc) {
 
 	//add in symbol list
 	name = fields[0];
-	symbol_type = label;
 	new_process = symbol_table -> locate_symbol(name);
 	if ( new_process != NULL ) { //variable has been declared
-		new_process -> set_stype(symbol_type);
+		new_process -> set_stype(label);
 		new_process -> set_dtype(undef);
 		message << "Symbol redeclared: ";
 	}
 	else {
-		new_process = new symbol(name, symbol_type, 1);//1 is arity 
+		new_process = new symbol(name, label, 1);//1 is arity 
 		symbol_table -> add(new_process);
 		message << "New process: ";
 	}	
 	message << name;
 
 	root = new ast(new_process);
-	symbol_table -> add_ast(new_process, root);
+	symbol_table -> add_ast(new_process, root); //add ast to ast table
 
 	//processing elements in head
 	vector<int>	semicolons;
@@ -212,6 +211,7 @@ string parser::collect_process(istream& stream, char& cc) {
 
 string parser::collect_body(istream& stream, char& cc, ast* head) { 
 	string	buffer;
+	string 	numeral;
 	vector<symbol*>	token_stream;
 	symbol*		token;
 	symbol*		token_temp;
@@ -220,9 +220,44 @@ string parser::collect_body(istream& stream, char& cc, ast* head) {
 
 	do {
 		stream.get(cc);
-		if ( cc =='\n') continue;
-		buffer+= cc;
 
+		if ( cc =='\n') continue;
+
+		if (isdigit(cc)) {
+			numeral += cc;
+			while (regex_match(numeral, 
+					regex("[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?"))) {
+				stream.get(cc); 
+			}//at exit, there is one new cc that's not included, so:
+			numeral.pop_back();
+
+			symbol* new_numeral = symbol_table->locate_symbol("-");
+			if (new_numeral==NULL)
+				new_numeral = new symbol(numeral, constant, 0);
+			symbol_table -> add(new_numeral);
+			token_stream.push_back(new_numeral);
+			numeral.clear();
+		}
+		else if (cc == '-') { //minus sign case
+			do {
+				stream.get(cc);
+			} while (cc==' '); //shouldn't have other spaces
+
+			if (!numeral.empty()) //"-" can only be at the beginning, avoids "--"
+				return "Error in numeral declaration";
+
+			if (!isdigit(cc)) {
+				token_stream.push_back(symbol_table->locate_symbol("-"));
+				if (cc == '-')
+					numeral += cc;
+			}
+			else {
+				numeral += cc;
+				continue;
+			}
+		}				
+
+		buffer+= cc; //not that the residue cc from numeral test is taken over
 		token = symbol_table->locate_symbol(buffer);
 
 		if (token!= NULL) { //partial match, check if it's full
