@@ -29,6 +29,8 @@ dictionary::~dictionary() {
 
 	add(new symbol("(", aux, 0));
 	add(new symbol(")", aux, 0));
+	add(new symbol(" ", aux, 0));
+	add(new symbol("\t", aux, 0));
 
 	add(new symbol("d/dt", sfunction, 1));
 }

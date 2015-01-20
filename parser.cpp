@@ -289,6 +289,11 @@ string parser::collect_body(istream& stream, char& cc, ast* head) {
 		}
 	} while (cc!='\n');
 
+	for(int i=0; i<token_stream.size(); i++) {
+		if (token_stream[i]->match(" ")||token_stream[i]->match("\t"))
+			token_stream.erase(token_stream.begin()+i); //eliminate spaces
+	}
+
 	string read_token_name = token_stream[0]->get_name();
 
 	if ( read_token_name == "end") {	
@@ -339,6 +344,8 @@ ast* parser::parse_assignment(vector<symbol*>& tokens, int offset) {
 		if (tokens[loc_equal]->match("="))
 			break; //not doing any sanity check
 	}
+
+
 
 	ast* head = new ast();
 	head -> set_head_symbol(symbol_table->locate_symbol("="));
