@@ -13,8 +13,7 @@ enum s_type {
 	variable,
 	relation,
 	connective,
-	process,
-	formula
+	label //labels can be given to processes, formulas, etc. 
 };
 
 //domain type

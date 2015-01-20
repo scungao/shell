@@ -6,6 +6,14 @@
 #include <vector>
 #include <set>
 
+//ast type
+enum a_type {
+	term,
+	formula,
+	statement,
+	process
+};
+
 //this ast is more general than the usual one
 class ast {
 	bool	terminal;

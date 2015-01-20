@@ -117,7 +117,7 @@ string parser::collect_process(istream& stream, char& cc) {
 
 	//add in symbol list
 	name = fields[0];
-	symbol_type = process;
+	symbol_type = label;
 	new_process = symbol_table -> locate_symbol(name);
 	if ( new_process != NULL ) { //variable has been declared
 		new_process -> set_stype(symbol_type);
