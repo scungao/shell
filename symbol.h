@@ -11,6 +11,7 @@ using namespace std;
 enum s_type {
 	constant,
 	variable,
+	parameter,
 	relation,
 	connective,
 	pconnective, //program connective

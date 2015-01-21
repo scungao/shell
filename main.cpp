@@ -14,7 +14,7 @@ int main() {
 	table	full_table;
 	converter global_converter(&full_table);
 	parser 	main_parser(&full_table);
-	tester	test_suite(&global_converter);
+	tester	test_suite(&full_table);
 
 	test_suite.test_printer();
 

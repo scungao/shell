@@ -15,8 +15,14 @@ ast::ast(symbol* s)
 	catch(exception& e){
 		cout<<"AST: error on base. "<<e.what()<<endl;
 	}
-	if (s->get_stype() == variable)
+	if (s->get_stype() == variable){
+		add_variable(s);
 		set_head_type(term);
+	}
+	if (s->get_stype() == parameter) {
+		add_parameter(s);
+		set_head_type(term);
+	}
 	else if (s->get_stype() == connective)
 		set_head_type(formula);
 	else if (s->get_stype() == pconnective)
@@ -81,14 +87,27 @@ ast::ast(symbol* s, ast* l1, ast* l2, ast* l3)
 	height += 1;
 }
 
+void ast::add_child(ast* a){ 
+	children.push_back(a); 
+	a->set_parent(this); 
+	set<symbol*>::iterator it;
+	for(it = a->get_variables_set()->begin(); 
+			it != a->get_variables_set()->end(); it++)
+		add_variable(*it); 
+
+	for(it = a->get_parameters_set()->begin(); 
+			it != a->get_parameters_set()->end(); it++)
+		add_parameter(*it);
+}
+
 string ast::print_prefix() {
 	stringstream result;
-	if (degree !=0) result<<"(";
+	if (get_degree() !=0) result<<"(";
 	result<<get_head_name();
 	for (int i=0; i< children.size(); i++) {
 		result <<" "<<children[i]->print_prefix();
 	}
-	if (degree!=0) result<<")";
+	if (get_degree() !=0) result<<")";
 	return result.str();
 }
 

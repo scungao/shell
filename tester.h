@@ -3,15 +3,14 @@
 
 #include "converter.h"
 
-class tester {
-	table*	symbol_table;
-	converter*	local_converter;
+class tester : public converter {
+	table* symbol_table;
 public:
-	tester(converter*);
+	tester(table*);
 	inline ~tester() {}
 	void test_printer();
 	ast* test_ast1();
-
+	ast* test_ast2();
 };
 
 #endif

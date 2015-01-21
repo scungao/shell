@@ -42,8 +42,7 @@ public:
 	inline void 	set_head_symbol(symbol* s) 
 		{ head_symbol = s; } 
 	inline ast* 	get_child(int i)	{ return children[i]; }
-	inline void		add_child(ast* a)	
-		{ children.push_back(a); a->set_parent(this); degree++; }
+	void		add_child(ast*);
 	inline int	get_degree()	{ return children.size(); }
 	//inline void set_degree(int d) { degree=d; }
 	inline int	get_height()	{ return height; }
