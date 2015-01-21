@@ -13,6 +13,7 @@ enum s_type {
 	variable,
 	relation,
 	connective,
+	pconnective, //program connective
 	sfunction, //"signature function" to avoid conflict with keyword
 	aux,
 	label //labels can be given to processes, formulas, etc. 

@@ -1,5 +1,6 @@
 #include "ast.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 
 using namespace std;
@@ -14,6 +15,15 @@ ast::ast(symbol* s)
 	catch(exception& e){
 		cout<<"AST: error on base. "<<e.what()<<endl;
 	}
+	if (s->get_stype() == variable)
+		set_head_type(term);
+	else if (s->get_stype() == connective)
+		set_head_type(formula);
+	else if (s->get_stype() == pconnective)
+		set_head_type(statement);
+	else if (s->get_stype() == relation)
+		set_head_type(formula); 
+	//more
 }
 
 ast::ast(symbol* s, ast* l)
@@ -69,6 +79,17 @@ ast::ast(symbol* s, ast* l1, ast* l2, ast* l3)
 	flatname.pop_back(); //delete trailing ","
 	flatname += ")";
 	height += 1;
+}
+
+string ast::print_prefix() {
+	stringstream result;
+	if (degree !=0) result<<"(";
+	result<<get_head_name();
+	for (int i=0; i< children.size(); i++) {
+		result <<" "<<children[i]->print_prefix();
+	}
+	if (degree!=0) result<<")";
+	return result.str();
 }
 
 ast::~ast() 

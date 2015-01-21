@@ -2,7 +2,7 @@
 #include "parser.h"
 #include <regex>
 
-parser::parser(dictionary* d): symbol_table(d) {
+parser::parser(table* d): symbol_table(d) {
 
 }
 parser::~parser() {}
@@ -302,7 +302,8 @@ string parser::collect_body(istream& stream, char& cc, ast* head) {
 	else if ( read_token_name.compare("if")==0) {
 		head -> set_head_symbol(symbol_table->locate_symbol("ite"));
 
-		ast* child1 = parse_formula(token_stream, 1); //offset=1
+		ast* child1 = new ast();
+		message << parse_formula(child1, token_stream, 1, token_stream.size()); //offset=1
 		head -> add_child(child1);
 
 		ast* child2 = new ast();
@@ -326,7 +327,8 @@ string parser::collect_body(istream& stream, char& cc, ast* head) {
 		else
 			head -> set_head_symbol(symbol_table->locate_symbol("seq"));		
 
-		ast* child1 = parse_assignment(token_stream, 0);
+		ast* child1 = new ast();
+		message << parse_assignment(child1, token_stream, 0, token_stream.size());
 		head -> add_child(child1); //left child
 
 		ast* child2 = new ast();
@@ -334,29 +336,64 @@ string parser::collect_body(istream& stream, char& cc, ast* head) {
 		collect_body(stream, cc, child2);
 	}
 	//only proper if ended with end
-	return "Not properly defined";
+	return message.str();
 }
 
-ast* parser::parse_assignment(vector<symbol*>& tokens, int offset) {
+string parser::parse_assignment(ast* head, vector<symbol*>& tokens, int start, int finish) {	
+	if (tokens[start+1]->match("=")) {//difference update
+		if (tokens[0]->get_stype() != variable) return "wrong";
 
-	int loc_equal;
-	for (loc_equal = offset; loc_equal<tokens.size(); loc_equal++) {
-		if (tokens[loc_equal]->match("="))
-			break; //not doing any sanity check
+		ast* var = new ast(tokens[0]); //variable
+		head -> add_child(var);
+
+		ast* rval = new ast();
+		parse_term(rval, tokens, 2, finish);
+		head -> add_child(rval);
+	}
+	else if (tokens[start+4]->match("=")) {//differential update
+		if (tokens[2]->get_stype() != variable) return "wrong";
+
+		ast* ddt = new ast(tokens[0]); //variable
+		head -> add_child(ddt);
+		ast* var = new ast(tokens[2]);
+		ddt -> add_child(var);
+
+		ast* rval = new ast();
+		parse_term(rval, tokens, 5, finish);
+		head -> add_child(rval);
+	}
+	else {
+		head = NULL;
+		return "Assignment syntax is wrong";
 	}
 
-
-
-	ast* head = new ast();
 	head -> set_head_symbol(symbol_table->locate_symbol("="));
 	head -> set_head_type(statement);
 
-	return head;
+	return "parsed";
 } 
 
-ast* parser::parse_formula(vector<symbol*>& tokens, int offset) {
-	ast* head = new ast();
-	return head;
+string parser::parse_term(ast* head, vector<symbol*>& tokens, int start, int finish) {
+
+	for (int i = start; i<finish; i++) {
+		if (tokens[i]->match("(")) {
+			ast* subterm = new ast();
+			parse_term(subterm, tokens, i+1, finish);
+		}
+		else if (tokens[i]->match(")")) {
+
+		}
+		else if (tokens[start]->get_stype() == sfunction) {
+		}
+		else if (tokens[start]->get_stype() == variable) {
+		}
+	}
+	return "parsed";
+}
+
+
+string parser::parse_formula(ast* head, vector<symbol*>& tokens, int start, int finish) {
+	return "parsed";
 } 
 
 

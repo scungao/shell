@@ -2,6 +2,8 @@
 #include <sstream>
 #include <string>
 #include <cctype>
+#include "converter.h"
+#include "tester.h"
 #include "parser.h"
 
 using namespace std;
@@ -9,9 +11,14 @@ using namespace std;
 inline void reply(string s) { cout<<"\033[36m"<<s<<"."<<"\033[0m"<<"\n"; }
 
 int main() {
-	dictionary	full_table;
+	table	full_table;
+	converter global_converter(&full_table);
 	parser 	main_parser(&full_table);
-	//solver	main_solver(&full_table);
+	tester	test_suite(&global_converter);
+
+	test_suite.test_printer();
+
+/*
 	char current_char;
 	string command;
 
@@ -65,6 +72,7 @@ int main() {
 	}
 
 	reply("Normal exit");
+*/
 	return 0;
 }
 

@@ -44,17 +44,22 @@ public:
 	inline ast* 	get_child(int i)	{ return children[i]; }
 	inline void		add_child(ast* a)	
 		{ children.push_back(a); a->set_parent(this); degree++; }
-	inline int	get_degree()	{ return degree; }
+	inline int	get_degree()	{ return children.size(); }
+	//inline void set_degree(int d) { degree=d; }
 	inline int	get_height()	{ return height; }
+	inline void set_height(int h) { height=h; }
 	inline bool		is_terminal()	{ return terminal; }
 	inline string	get_flatname()	{ return flatname; }
 	inline void		set_terminal()	{ terminal = true; }
+	inline double	get_period()	{ return period; }
 	inline void 	set_period(double p)	{ period = p; }
 	inline void	add_variable(symbol* v) { variables.insert(v); }
 	inline void	add_parameter(symbol* p) { variables.insert(p); }
+	inline set<symbol*>* get_variables_set() { return &variables; }
+	inline set<symbol*>* get_parameters_set() { return &parameters; }
 	inline void set_parent(ast* a) { parent = a; }
-	inline ast* get_parent()	
-		{ assert(parent!=NULL); return parent;}
+	inline ast* get_parent() { return parent;}
+	string print_prefix();
 };
 
 #endif

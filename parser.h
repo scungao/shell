@@ -6,17 +6,17 @@
 #include <sstream>
 #include <regex>
 #include "ast.h"
-#include "dictionary.h"
+#include "table.h"
 
 
 using namespace std;
 
 class parser {
-	dictionary*		symbol_table;
+	table*		symbol_table;
 	string		symbol_name_list; //collects all symbol names
 	set<int>	precedence_set;
 public:
-	parser(dictionary*);
+	parser(table*);
 	~parser();
 
 	inline int symbol_table_size()	
@@ -25,8 +25,9 @@ public:
 	string	collect_constant(istream&, char&);
 	string	collect_process(istream&, char&);
 	string	collect_body(istream&, char&, ast*);
-	ast*	parse_assignment(vector<symbol*>&, int);
-	ast*	parse_formula(vector<symbol*>&, int);
+	string	parse_assignment(ast*, vector<symbol*>&, int, int);
+	string	parse_formula(ast*, vector<symbol*>&, int, int);
+	string  parse_term(ast*, vector<symbol*>&, int, int);
 	//ast* parse(string);
 };
 
