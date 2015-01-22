@@ -111,6 +111,49 @@ string ast::print_prefix() {
 	return result.str();
 }
 
+string ast::print_smt2(bool print_params) {
+/*
+(set-logic QF_NRA)
+(declare-fun x1 () Real)
+(declare-fun x2 () Real)
+(assert (<= 3.0 x1))
+(assert (<= x1 3.14))
+(assert (<= -7.0 x2))
+(assert (<= x2 5.0))
+(assert (<= (- (* 2.0 3.14159265) (* 2.0 (* x1 (arcsin (* (cos 0.797) (sin (/ 3.14159265 x1)))))))
+(+ (- 0.591 (* 0.0331 x2)) (+ 0.506 1.0))))
+(check-sat)
+(exit)
+*/
+	stringstream result;
+	stringstream vtemp; //keep bounds on vars
+	stringstream ptemp;
+
+	result<<"(set-logic QF_NRA)"<<endl;
+	set<symbol*>::iterator it;
+	for (it = variables.begin(); it!= variables.end(); it++) {
+		result<<"(declare-fun "<<(*it)->get_name()<<" () Real)"<<endl;
+		vtemp<<"(assert (<= "<<(*it)->get_name()<<" "<<(*it)->get_upper()<<"))"<<endl;
+		vtemp<<"(assert (>= "<<(*it)->get_name()<<" "<<(*it)->get_lower()<<"))"<<endl;			
+	}
+	if (print_params) {
+		for (it = parameters.begin(); it!= parameters.end(); it++) {
+			result<<"(declare-fun "<<(*it)->get_name()<<" () Real)"<<endl;
+			ptemp<<"(assert (<= "<<(*it)->get_name()<<" "<<(*it)->get_upper()<<"))"<<endl;
+			ptemp<<"(assert (>= "<<(*it)->get_name()<<" "<<(*it)->get_lower()<<"))"<<endl;
+		}
+
+	}
+	result<<vtemp.str()<<ptemp.str();
+	result<<"(assert "<<print_prefix()<<")"<<endl;
+	result<<"(check-sat)"<<endl;
+	result<<"(exit)"<<endl;
+
+	return result.str();
+}
+
+
+
 ast::~ast() 
 {
 }

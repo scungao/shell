@@ -36,45 +36,66 @@ ast* tester::test_ast1() {
 }
 
 ast* tester::test_ast2() { 
-/*inverted pendulum	
-A = [0      1              0           0;
-     0 -(I+m*l^2)*b/p  (m^2*g*l^2)/p   0;
-     0      0              0           1;
-     0 -(m*l*b)/p       m*g*l*(M+m)/p  0];
-B = [     0;
-     (I+m*l^2)/p;
-          0;
-        m*l/p];
-*/
 
 //the four labels of functions
-	symbol* lf[4];
-	lf[0] = new symbol("f1", label, 1);
-	lf[1] = new symbol("f2", label, 1);
-	lf[2] = new symbol("f3", label, 1);
-	lf[3] = new symbol("f4", label, 1);
+	symbol* lf[5]; //just to make the index clear
+	lf[1] = new symbol("f1", label, 1);
+	lf[2] = new symbol("f2", label, 1);
+	lf[3] = new symbol("f3", label, 1);
+	lf[4] = new symbol("f4", label, 1);
+
+	ast* m = num("1.0");
+	ast* M = num("2.0");
+	ast* L = num("1.0");
+	ast* g = num("9.8");
+	ast* c2 = num("2");
+	ast* c0 = num("0");
+
 
 //the four variables
-	symbol*	vars[4];
-	vars[0] = new symbol("x", variable, 0);
-	vars[1] = new symbol("dx", variable, 0);
-	vars[2] = new symbol("theta", variable, 0);
-	vars[3] = new symbol("thetad", variable, 0);
+	ast* x1 = var("x");
+	x1 -> set_bounds(-10, 10);
+
+	ast* x2 = var("xd");
+	x2 -> set_bounds(-10, 10);
+
+	ast* x3 = var("theta");
+	x3 -> set_bounds(-10, 10);
+
+	ast* x4 = var("thetad");
+	x4 -> set_bounds(-10, 10);
+
+	ast* u = param("u");
+	u -> set_bounds(-10, 10);
 
 //define the functions
-	ast* f[4];
-	ast* x[4];
+	ast* f[5]; 
 
-	for(int i=0; i<4; i++) {
-		f[i] = new ast(lf[i]);
-		x[i] = new ast(vars[i]);
-	}
+	//f1
+	f[1] = x1;
 
-	return NULL;
+	//f2
+	ast* term21 = mul(mul(mul(m,L),sin(x3)),pow(x4,c2));
+	ast* term22 = mul(m, mul(g, mul( cos(x3), sin(x3))));
+	ast* term23 = add(mul(m, pow(sin(x3), c2)), M);
+	f[2] = div(add(add(term21,term22),u),term23);
+
+	//f3
+	f[3] = x4;
+
+	//f4
+	ast* term41 = mul(mul(mul(mul(m,L),sin(x3)),cos(x3)),pow(x4,c2));
+	ast* term42 = mul(mul(add(m,M),g),sin(x3));
+	ast* term43 = mul(cos(x3),u);
+	ast* term44 = mul(sub(c0,L),add(mul(m,pow(sin(x3),c2)),M));
+	f[4] = div(add(add(term41,term42),term43),term44);
+
+	ast* formula1 = land(eq(f[1],c0),eq(f[2],c0));
+
+	return formula1;
 }
 
-
-
 void tester::test_printer() {
-	cout<< test_ast1()->print_prefix()<<endl;
+	//cout<< test_ast1()->print_prefix()<<endl;
+	cout<< test_ast2()->print_smt2(true)<<endl;
 } 

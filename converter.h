@@ -29,7 +29,7 @@ public:
 		return result;
 	}
 
-	inline ast*	mult(ast* a1, ast* a2) { 
+	inline ast*	mul(ast* a1, ast* a2) { 
 		ast* result = new ast(symbol_table->locate_symbol("*")); 
 		result -> add_child(a1);
 		result -> add_child(a2);
@@ -49,9 +49,28 @@ public:
 		return result;
 	}
 
-	inline ast*	pow(ast* a1) { 
+	inline ast*	sin(ast* a1) { 
+		ast* result = new ast(symbol_table->locate_symbol("sin")); 
+		result -> add_child(a1);
+		return result;
+	}	
+
+	inline ast*	cos(ast* a1) { 
+		ast* result = new ast(symbol_table->locate_symbol("cos")); 
+		result -> add_child(a1);
+		return result;
+	}
+
+	inline ast*	tan(ast* a1) { 
+		ast* result = new ast(symbol_table->locate_symbol("tan")); 
+		result -> add_child(a1);
+		return result;
+	}	
+
+	inline ast*	pow(ast* a1, ast* a2) { 
 		ast* result = new ast(symbol_table->locate_symbol("^")); 
 		result -> add_child(a1);
+		result -> add_child(a2);
 		return result;
 	}
 
@@ -118,9 +137,12 @@ public:
 		return result;
 	} 
 
-	inline ast* number(string s) {
+	inline ast* num(string s) {
 		symbol* new_num = symbol_table->locate_symbol(s);
-		if (new_num == NULL) new_num = new symbol(s, constant, 0);
+		if (new_num == NULL){ 
+			new_num = new symbol(s, constant, 0);
+			symbol_table -> add(new_num);
+		}
 		ast* a = new ast(new_num);
 		return a;
 	}
@@ -128,7 +150,7 @@ public:
 	inline ast* var(string s) {
 		symbol* new_var = symbol_table->locate_symbol(s);
 		if (new_var == NULL) {
-			new_var = new symbol(s, constant, 0);
+			new_var = new symbol(s, variable, 0);
 			symbol_table -> add(new_var);
 		}
 		ast* a = new ast(new_var);
@@ -138,12 +160,16 @@ public:
 	inline ast* param(string s) {
 		symbol* new_param = symbol_table->locate_symbol(s);
 		if (new_param == NULL) {
-			new_param = new symbol(s, constant, 0);
+			new_param = new symbol(s, parameter, 0);
 			symbol_table -> add(new_param);
 		}
 		ast* a = new ast(new_param);
 		return a;
 	}
+
+
+
+
 
 };
 

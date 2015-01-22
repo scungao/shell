@@ -7,6 +7,9 @@ table::table() {
 	add(new symbol("/", sfunction, 2));
 	add(new symbol("^", sfunction, 2));
 	add(new symbol("sqrt", sfunction, 1));
+	add(new symbol("sin", sfunction, 1));
+	add(new symbol("cos", sfunction, 1));
+	add(new symbol("tan", sfunction, 1));
 
 	add(new symbol("and", connective));
 	add(new symbol("or", connective));
