@@ -63,9 +63,12 @@ public:
 	inline void set_bounds(double a, double b) {
 		head_symbol->set_upper(b); head_symbol->set_lower(a);
 	}
-	
+	void normalize();
+
+	string print_tree();
 	string print_prefix();
 	string print_smt2(bool);
+
 };
 
 #endif

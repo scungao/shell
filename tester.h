@@ -8,7 +8,7 @@ class tester : public converter {
 public:
 	tester(table*);
 	inline ~tester() {}
-	void test_printer();
+	void testall();
 	ast* test_ast1();
 	ast* test_ast2();
 };

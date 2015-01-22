@@ -12,9 +12,9 @@ table: table.cpp
 	$(CC) $(FLAGS) -c table.cpp
 parser: parser.cpp
 	$(CC) $(FLAGS) -c parser.cpp
-converter: converter.cpp	
-	$(CC) $(FLAGS) -c converter.cpp
 tester: tester.cpp
 	$(CC) $(FLAGS) -c tester.cpp
+converter: converter.cpp	
+	$(CC) $(FLAGS) -c converter.cpp
 clean:
 	rm -rf *.o cda

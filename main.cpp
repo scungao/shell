@@ -16,11 +16,9 @@ int main() {
 	parser 	main_parser(&full_table);
 	tester	test_suite(&full_table);
 
-	test_suite.test_printer();
-
-/*
 	char current_char;
 	string command;
+	string subcommand;
 
 	cout<<"\033[36m"<<"cda$ "<<"\033[0m";
 	cin.get(current_char);
@@ -38,6 +36,19 @@ int main() {
 				|| command.compare("bye") ==0 ) {
 			break;
 		}
+		else if ( command.compare("test") == 0) {
+			test_suite.testall();
+		}
+		else if ( command.compare("print")==0) {
+			subcommand.clear();
+			do {
+				cin.get(current_char);
+				if(!isspace(current_char))
+					subcommand += current_char;
+			} while(current_char!='\n');
+			//full_table.locate_symbol(current_char)->get_name();
+			continue;
+		}
 		else if ( command.compare("variable") == 0 ) {
 			reply(main_parser.collect_variable(cin, current_char));
 			continue; //avoids getchar at the bottom of the loop
@@ -51,9 +62,6 @@ int main() {
 			continue;
 		}
 		else if ( command.compare("formula") == 0 ) {
-			//main_parser.collect_head(command);
-			//main_parser.collect_body(cin);
-			reply("");
 		}
 		else if ( command.compare("solve") == 0 ) {
 			//main_solver.run(command);
@@ -72,7 +80,6 @@ int main() {
 	}
 
 	reply("Normal exit");
-*/
 	return 0;
 }
 

@@ -111,6 +111,15 @@ string ast::print_prefix() {
 	return result.str();
 }
 
+string ast::print_tree() {
+	stringstream result;
+	result<<get_head_name()<<endl;
+	for (int i=0; i< children.size(); i++) {
+		result <<" "<<children[i]->print_tree();
+	}
+	return result.str();
+}
+
 string ast::print_smt2(bool print_params) {
 /*
 (set-logic QF_NRA)
@@ -150,6 +159,9 @@ string ast::print_smt2(bool print_params) {
 	result<<"(exit)"<<endl;
 
 	return result.str();
+}
+
+void ast::normalize() {
 }
 
 

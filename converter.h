@@ -10,10 +10,10 @@ public:
 		symbol_table(t) {}
 	inline ~converter() {}
 	inline table*	get_table() {return symbol_table;}
-	string substitute(ast*, ast*, symbol*, symbol*); //substitute symbol by symbol
-	string substitute(ast*, ast*, symbol*, ast*); //substitute symbol by ast
+	ast* replace(ast*, symbol*, symbol*); //substitute symbol by symbol
+	ast* replace(ast*, symbol*, ast*); //substitute symbol by ast
 	ast*	process_to_formula(ast*);
-	ast*	copy(ast*);	
+	ast*	dup(ast*);	
 
 	inline ast*	add(ast* a1, ast* a2) { 
 		ast* result = new ast(symbol_table->locate_symbol("+")); 

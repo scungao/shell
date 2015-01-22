@@ -72,7 +72,7 @@ ast* tester::test_ast2() {
 	ast* f[5]; 
 
 	//f1
-	f[1] = x1;
+	f[1] = x2;
 
 	//f2
 	ast* term21 = mul(mul(mul(m,L),sin(x3)),pow(x4,c2));
@@ -90,12 +90,13 @@ ast* tester::test_ast2() {
 	ast* term44 = mul(sub(c0,L),add(mul(m,pow(sin(x3),c2)),M));
 	f[4] = div(add(add(term41,term42),term43),term44);
 
-	ast* formula1 = land(eq(f[1],c0),eq(f[2],c0));
-
-	return formula1;
+	ast* formula1 = land(land(eq(f[3],c0),land(eq(f[1],c0),eq(f[2],c0))),eq(f[4],c0));
+	ast* formula2 = dup(formula1);
+	return formula2;
 }
 
-void tester::test_printer() {
+void tester::testall() {
 	//cout<< test_ast1()->print_prefix()<<endl;
+	//cout<<test_ast2()->print_tree();
 	cout<< test_ast2()->print_smt2(true)<<endl;
 } 
