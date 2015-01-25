@@ -148,10 +148,10 @@ string parser::collect_process(istream& stream, char& cc) {
 	if (semicolons.size() == 0 && colons.size() == 1) { //only state vars 
 		for(int i= colons[0]+1 ; i<fields.size() ; i++) { //after name, before ;
 			symbol* var_addr = symbol_table->locate_symbol(fields[i]);
-			if (var_addr!=NULL && var_addr->get_stype() == variable)
-				root->add_variable(var_addr);
-			else 
-				return "You have used an undeclared variable. Process not declared.";
+			//if (var_addr!=NULL && var_addr->get_stype() == variable)
+				//root->add_variable(var_addr);
+			//else 
+			//	return "You have used an undeclared variable. Process not declared.";
 		}
 	} 
 	else if (semicolons.size() == 1 && colons.size() == 2) { //state vars and parameters or period
@@ -160,26 +160,26 @@ string parser::collect_process(istream& stream, char& cc) {
 			root -> set_period(stod(after_first_colon));
 			for(int i= colons[1]+1 ; i<fields.size() ; i++) { //after name, before ;
 				symbol* var_addr = symbol_table->locate_symbol(fields[i]);
-				if (var_addr!=NULL && var_addr->get_stype() == variable)
-					root->add_variable(var_addr);
-				else 
-					return "You have used an undeclared variable. Process not declared.";
+				//if (var_addr!=NULL && var_addr->get_stype() == variable)
+				//	root->add_variable(var_addr);
+				//else 
+				//	return "You have used an undeclared variable. Process not declared.";
 			}
 		}
 		else { //state vars and parameters
 			for(int i= colons[0]+1 ; i<semicolons[0] ; i++) { //after name, before ;
 				symbol* var_addr = symbol_table->locate_symbol(fields[i]);
-				if (var_addr!=NULL && var_addr->get_stype() == variable)
-					root->add_variable(var_addr);
-				else 
-					return "You have used an undeclared variable. Process not declared.";
+				//if (var_addr!=NULL && var_addr->get_stype() == variable)
+				//	root->add_variable(var_addr);
+				//else 
+				//	return "You have used an undeclared variable. Process not declared.";
 			}
 			for(int i= colons[1]+1 ; i<fields.size() ; i++) { //after name, before ;
 				symbol* param_addr = symbol_table->locate_symbol(fields[i]);
-				if (param_addr!=NULL && param_addr->get_stype() == variable)
-					root->add_parameter(param_addr);
-				else 
-					return "You have used an undeclared parameter. Process not declared.";
+				//if (param_addr!=NULL && param_addr->get_stype() == variable)
+				//	root->add_parameter(param_addr);
+				//else 
+				//	return "You have used an undeclared parameter. Process not declared.";
 			}
 		}	
 	}
@@ -188,17 +188,17 @@ string parser::collect_process(istream& stream, char& cc) {
 		root -> set_period(stod(after_first_colon));
 		for(int i= colons[1]+1 ; i<semicolons[1] ; i++) { //after name, before ;
 			symbol* var_addr = symbol_table->locate_symbol(fields[i]);
-			if (var_addr!=NULL && var_addr->get_stype() == variable)
-				root->add_variable(var_addr);
-			else 
-				return "You have used an undeclared variable. Process not declared.";
+			//if (var_addr!=NULL && var_addr->get_stype() == variable)
+			//	root->add_variable(var_addr);
+			//else 
+			//	return "You have used an undeclared variable. Process not declared.";
 		}
 		for(int i= colons[2]+1 ; i<fields.size() ; i++) { //after name, before ;
 			symbol* param_addr = symbol_table->locate_symbol(fields[i]);
-			if (param_addr!=NULL && param_addr->get_stype() == variable)
-				root->add_parameter(param_addr);
-			else 
-				return "You have used an undeclared parameter. Process not declared.";
+			//if (param_addr!=NULL && param_addr->get_stype() == variable)
+			//	root->add_parameter(param_addr);
+			//else 
+			//	return "You have used an undeclared parameter. Process not declared.";
 		}
 	}
 	else {
@@ -368,7 +368,7 @@ string parser::parse_assignment(ast* head, vector<symbol*>& tokens, int start, i
 	}
 
 	head -> set_head_symbol(symbol_table->locate_symbol("="));
-	head -> set_head_type(statement);
+	//head -> set_head_type(statement);
 
 	return "parsed";
 } 

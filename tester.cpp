@@ -35,7 +35,7 @@ ast* tester::test_ast1() {
 	return test_ast1;
 }
 
-ast* tester::test_ast2() { 
+void tester::test_ast2() { 
 
 //the four labels of functions
 	symbol* lf[5]; //just to make the index clear
@@ -92,11 +92,15 @@ ast* tester::test_ast2() {
 
 	ast* formula1 = land(land(eq(f[3],c0),land(eq(f[1],c0),eq(f[2],c0))),eq(f[4],c0));
 	ast* formula2 = dup(formula1);
-	return formula2;
+	ast* formula3 = copy_replace(formula1, x3, m);
+
+	cout<< formula2 -> print_smt2(true) << endl;
+	cout<< formula3 -> print_smt2(false) <<endl;
 }
 
 void tester::testall() {
 	//cout<< test_ast1()->print_prefix()<<endl;
 	//cout<<test_ast2()->print_tree();
-	cout<< test_ast2()->print_smt2(true)<<endl;
+	//cout<< test_ast2()->print_smt2(true)<<endl;
+	test_ast2();
 } 

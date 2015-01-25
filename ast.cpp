@@ -8,96 +8,73 @@ using namespace std;
 ast::ast(symbol* s)
 	:	head_symbol(s), terminal(true), 
 		degree(0), height(0), parent(NULL)
-{
-	try{
-		flatname = s -> get_name();
-	}
-	catch(exception& e){
-		cout<<"AST: error on base. "<<e.what()<<endl;
-	}
-	if (s->get_stype() == variable){
-		add_variable(s);
-		set_head_type(term);
-	}
-	if (s->get_stype() == parameter) {
-		add_parameter(s);
-		set_head_type(term);
-	}
-	else if (s->get_stype() == connective)
-		set_head_type(formula);
-	else if (s->get_stype() == pconnective)
-		set_head_type(statement);
-	else if (s->get_stype() == relation)
-		set_head_type(formula); 
-	//more
-}
+{}
 
 ast::ast(symbol* s, ast* l)
 	:	head_symbol(s), terminal(false), degree(1), parent(NULL)
 {
-	flatname = s->get_name();
+//	flatname = s->get_name();
 	children.push_back(l);
-	flatname += "(";
-	flatname += l->flatname;
-	flatname += ")";
-	height = (children[0]->height)+1;
+//	flatname += "(";
+//	flatname += l->flatname;
+//	flatname += ")";
+//	height = (children[0]->height)+1;
 }
 
 
 ast::ast(symbol* s, ast* l1, ast* l2)
 	:	head_symbol(s), terminal(false), degree(2), parent(NULL)
 {
-	flatname = s->get_name();
+//	flatname = s->get_name();
 
 	children.push_back(l1);
 	children.push_back(l2);
 
-	flatname += "(";
+//	flatname += "(";
 	height = 0;
 	for (int i=0; i<2; i++) {
 		if ( children[i]->height > height ) 
 			height = children[i]->height;
-		flatname += children[i]->flatname;
-		flatname += ",";
+//		flatname += children[i]->flatname;
+//		flatname += ",";
 	}
-	flatname.pop_back(); //delete trailing ","
-	flatname += ")";
+//	flatname.pop_back(); //delete trailing ","
+//	flatname += ")";
 	height += 1;
 }
 
 ast::ast(symbol* s, ast* l1, ast* l2, ast* l3)
 	:	head_symbol(s), terminal(false), degree(3), parent(NULL) 
 {
-	flatname = s->get_name();
+//	flatname = s->get_name();
 	
 	children.push_back(l1);
 	children.push_back(l2);
 	children.push_back(l3);
 
-	flatname += "(";
+//	flatname += "(";
 	height = 0;
 	for (int i=0; i<3; i++) {
 		if ( children[i]->height > height ) 
 			height = children[i]->height;
-		flatname += children[i]->flatname;
-		flatname += ",";
+//		flatname += children[i]->flatname;
+//		flatname += ",";
 	}
-	flatname.pop_back(); //delete trailing ","
-	flatname += ")";
+//	flatname.pop_back(); //delete trailing ","
+//	flatname += ")";
 	height += 1;
 }
 
 void ast::add_child(ast* a){ 
 	children.push_back(a); 
 	a->set_parent(this); 
-	set<symbol*>::iterator it;
-	for(it = a->get_variables_set()->begin(); 
-			it != a->get_variables_set()->end(); it++)
-		add_variable(*it); 
-
-	for(it = a->get_parameters_set()->begin(); 
-			it != a->get_parameters_set()->end(); it++)
-		add_parameter(*it);
+//	set<symbol*>::iterator it;
+//	for(it = a->get_variables_set()->begin(); 
+//			it != a->get_variables_set()->end(); it++)
+//		add_variable(*it); 
+//	for(it = a->get_parameters_set()->begin(); 
+//			it != a->get_parameters_set()->end(); it++)
+//		add_parameter(*it);
 }
 
 string ast::print_prefix() {
@@ -139,14 +116,21 @@ string ast::print_smt2(bool print_params) {
 	stringstream ptemp;
 
 	result<<"(set-logic QF_NRA)"<<endl;
+
+	set<symbol*> variable_set;
+
+	collect(variable_set, variable);
 	set<symbol*>::iterator it;
-	for (it = variables.begin(); it!= variables.end(); it++) {
+
+	for (it = variable_set.begin(); it!= variable_set.end(); it++) {
 		result<<"(declare-fun "<<(*it)->get_name()<<" () Real)"<<endl;
 		vtemp<<"(assert (<= "<<(*it)->get_name()<<" "<<(*it)->get_upper()<<"))"<<endl;
 		vtemp<<"(assert (>= "<<(*it)->get_name()<<" "<<(*it)->get_lower()<<"))"<<endl;			
 	}
 	if (print_params) {
-		for (it = parameters.begin(); it!= parameters.end(); it++) {
+		set<symbol*> parameter_set;
+		collect(parameter_set, parameter);
+		for (it = parameter_set.begin(); it!= parameter_set.end(); it++) {
 			result<<"(declare-fun "<<(*it)->get_name()<<" () Real)"<<endl;
 			ptemp<<"(assert (<= "<<(*it)->get_name()<<" "<<(*it)->get_upper()<<"))"<<endl;
 			ptemp<<"(assert (>= "<<(*it)->get_name()<<" "<<(*it)->get_lower()<<"))"<<endl;
@@ -161,10 +145,12 @@ string ast::print_smt2(bool print_params) {
 	return result.str();
 }
 
-void ast::normalize() {
+void ast::collect(set<symbol*>& vs, s_type s) {
+	if (head_symbol -> get_stype() == s)
+		vs.insert(head_symbol);
+	for (int i=0; i<get_degree(); i++)
+		get_child(i) -> collect(vs,s);
 }
-
-
 
 ast::~ast() 
 {

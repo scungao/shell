@@ -10,7 +10,7 @@ public:
 	inline ~tester() {}
 	void testall();
 	ast* test_ast1();
-	ast* test_ast2();
+	void test_ast2();
 };
 
 #endif

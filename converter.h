@@ -11,6 +11,9 @@ public:
 	inline ~converter() {}
 	inline table*	get_table() {return symbol_table;}
 	ast* replace(ast*, symbol*, symbol*); //substitute symbol by symbol
+	ast* replace(ast*, ast*, ast*);
+	ast* copy_replace(ast*, symbol*, symbol*);
+	ast* copy_replace(ast*, ast*, ast*);//use with caution
 	ast* replace(ast*, symbol*, ast*); //substitute symbol by ast
 	ast*	process_to_formula(ast*);
 	ast*	dup(ast*);	
