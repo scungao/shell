@@ -15,6 +15,13 @@ public:
 //	ast* copy_replace(ast*, symbol*, symbol*);
 //	ast* copy_replace(ast*, ast*, ast*);
 //	ast* replace(ast*, symbol*, ast*); //substitute symbol by ast
+
+	inline void set_head_name(ast* a, string s) {
+		symbol* ss = symbol_table->locate_symbol(s);
+		a->set_head_symbol(ss);
+	}
+
+
 	ast* substitute(ast*, ast*, ast*); //use with caution
 	ast* substitute(ast*, symbol*, symbol*); //need consecutive substitution
 	inline ast* substitute(ast* source, map<ast*, ast*>& m) {
@@ -24,10 +31,23 @@ public:
 		}
 		return source;
 	}
+	inline ast* substitute(ast* source, map<symbol*, symbol*>& m) {
+		map<symbol*, symbol*>::iterator it;
+		for (it=m.begin(); it!=m.end(); it++) {
+			source = substitute(source, it->first, it->second);
+		}
+		return source;
+	}
 	ast*	process_to_formula(ast*);
 	ast*	dup(ast*);	
 	void	get_dreal_solutions(ast*, map<symbol*, symbol*>&);
-	ast*	simplify(ast*);//compress constants
+	void	simplify(ast*);//compress constants
+
+	ast*	partial(ast*, symbol*);
+	inline ast* partial(ast* a, ast* s) {
+		return partial(a, s->get_head_symbol());
+	}
+
 
 	inline ast*	add(ast* a1, ast* a2) { 
 		ast* result = new ast(symbol_table->locate_symbol("+")); 
@@ -86,6 +106,10 @@ public:
 		result -> add_child(a1);
 		result -> add_child(a2);
 		return result;
+	}
+
+	inline ast* pow2(ast* a) {
+		return pow(a, num("2"));
 	}
 
 	inline ast* gt(ast* a1, ast* a2) {

@@ -94,7 +94,8 @@ void tester::test_ast2() {
 	ast* formula2 = dup(formula1);
 	ast* formula3 = substitute(formula1, symbol_table->locate_symbol("thetad"), 
 							symbol_table->locate_symbol("0"));
-	ast* formula4 = substitute(x2, x2, m);
+	ast* formula41 = substitute(x2, x3, m);
+	ast* formula4 = add(x2, mul(x3, div(x1, x2)));
 //	ast* formula4 = copy_replace(formula1, symbol_table->locate_symbol("xd"), 
 //							symbol_table->locate_symbol("1"));
 
@@ -112,7 +113,17 @@ void tester::test_ast2() {
 	cout<<"original: "<<formula1 -> print_smt2(true)<<endl;
 	simplify(formula1);
 
-	cout<<"simplified: "<<formula1 -> print_smt2(true)<<endl;
+	cout<<"simplified: "<<formula1 -> print_smt2(false)<<endl;
+
+	ast* formula5 = partial(formula4, symbol_table->locate_symbol("xd"));
+	cout<<"derivative of: "<<formula4 -> print_prefix()<<" is "
+		<<formula5 -> print_prefix()<<endl;
+
+	ast* formula6 = div(x2, x3);
+	cout << partial(formula6, x2)->print_prefix()<<endl;
+
+	cout<<formula5 -> print_smt2(true)<<endl;
+
 }
 
 void tester::testall() {

@@ -98,13 +98,13 @@ int main () {
 	dreal_result.close();
 }
 
-ast* converter::simplify(ast* a) {
+void converter::simplify(ast* a) {
 
 	for (int i=0; i<a->get_degree(); i++) {
 		simplify(a -> get_child(i));
 	}
 
-	if(a->get_degree()==0) return a;
+	if(a->get_degree()==0) return;
 
 	if (a->get_head_name() == "+") {
 		if (a->get_child_type(0) == constant 
@@ -118,8 +118,17 @@ ast* converter::simplify(ast* a) {
 	}
 	
 	else if (a->get_head_name() == "*") {
+		if (a->get_child(0)->get_name() == "0"
+			|| a->get_child(0)->get_name() == "0.0"
+			|| a->get_child(1)->get_name() == "0"
+			|| a->get_child(1)->get_name() == "0.0"){
+			a->set_head_symbol(num_sym("0"));
+			a->clear_children();
+		}
+
 		if (a->get_child_type(0) == constant 
-				&& a->get_child_type(1) == constant) {
+				&& a->get_child_type(1) == constant)
+				 {
 			double c1 = a->get_child(0)->get_value();
 			double c2 = a->get_child(1)->get_value();
 			double c = c1*c2;
@@ -182,8 +191,57 @@ ast* converter::simplify(ast* a) {
 		}
 	}	
 
-	return a;
+	//return a;
 
 }
+
+ast* converter::partial(ast* V, symbol* x) { //change the places that need to be changed, then simplify
+	ast* result;
+	if (V->get_head_symbol() == x) {
+		result = num("1");
+	}
+	else if (V->get_head_symbol()->get_stype() == variable 
+				|| V->get_head_symbol()->get_stype() == parameter
+				|| V->get_head_symbol()->get_stype() == constant ) {
+		result = num("0");
+	}
+	else if ( V-> get_head_name()== "+") {
+		result = add(	partial(V->get_child(0), x)
+						, 
+						partial(V->get_child(1), x)
+					);
+	}
+	else if ( V-> get_head_name() == "-") {
+		result = sub(	partial(V->get_child(0), x)
+						, 
+						partial(V->get_child(1), x)
+					);
+	}
+	else if ( V-> get_head_name() == "*") {
+			result = add(
+							mul(partial(V->get_child(1), x), V->get_child(0))
+							,
+							mul(partial(V->get_child(0), x), V->get_child(1))
+						);
+	}
+	else if ( V-> get_head_name() == "/") {
+			result = mul(
+							sub(
+								mul(partial(V->get_child(0), x), V->get_child(1))
+								,
+								mul(partial(V->get_child(1), x), V->get_child(0))
+								)
+							,
+							pow(V->get_child(1),num("-2"))
+						);
+	}
+	else {
+		result = dup(V);
+	}
+	simplify(result);
+	return result;
+}
+
+
 
 

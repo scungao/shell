@@ -49,14 +49,22 @@ public:
 		}
 	}
 	inline symbol*	get_head_symbol()	{ return head_symbol; }
+	inline bool	compare_head_symbol(symbol* s) 
+		{ return s == get_head_symbol(); }
 	inline string	get_head_name()	{ return head_symbol->get_name(); }
+	inline string 	get_name() { return get_head_name(); }
 	inline void 	set_head_symbol(symbol* s) { head_symbol = s; } 
+
 	inline ast* 	get_child(int i)	{ return children[i]; }
 	inline s_type 	get_child_type(int i) { 
 		return children[i]-> get_head_symbol() -> get_stype(); }
 	inline double 	get_value() { return get_head_symbol()->get_value();}
 	inline void clear_child(int i) { children.erase(children.begin()+i); }
-	inline void clear_children() { children.clear(); }
+	inline void clear_children() { 
+	//	for (int i=0; i<get_degree(); i++) 
+	//		delete(children[i]);
+		children.clear(); 
+	}
 	void		add_child(ast*);
 	inline int	get_degree()	{ return children.size(); }
 	//inline void set_degree(int d) { degree=d; 
@@ -83,7 +91,8 @@ public:
 	void collect(set<symbol*>&, s_type);
 	string print_tree();
 	string print_prefix();
-	string print_smt2(bool);
+	string print_smt2(bool);//bool sets the formula or its negation
+
 
 };
 

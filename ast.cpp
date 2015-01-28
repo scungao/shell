@@ -103,7 +103,7 @@ string ast::print_tree() {
 	return result.str();
 }
 
-string ast::print_smt2(bool print_params) {
+string ast::print_smt2(bool polar) {
 /*
 (set-logic QF_NRA)
 (declare-fun x1 () Real)
@@ -133,18 +133,21 @@ string ast::print_smt2(bool print_params) {
 		vtemp<<"(assert (<= "<<(*it)->get_name()<<" "<<(*it)->get_upper()<<"))"<<endl;
 		vtemp<<"(assert (>= "<<(*it)->get_name()<<" "<<(*it)->get_lower()<<"))"<<endl;			
 	}
-	if (print_params) {
-		set<symbol*> parameter_set;
-		collect(parameter_set, parameter);
-		for (it = parameter_set.begin(); it!= parameter_set.end(); it++) {
-			result<<"(declare-fun "<<(*it)->get_name()<<" () Real)"<<endl;
-			ptemp<<"(assert (<= "<<(*it)->get_name()<<" "<<(*it)->get_upper()<<"))"<<endl;
-			ptemp<<"(assert (>= "<<(*it)->get_name()<<" "<<(*it)->get_lower()<<"))"<<endl;
-		}
 
+	set<symbol*> parameter_set;
+	collect(parameter_set, parameter);
+	for (it = parameter_set.begin(); it!= parameter_set.end(); it++) {
+		result<<"(declare-fun "<<(*it)->get_name()<<" () Real)"<<endl;
+		ptemp<<"(assert (<= "<<(*it)->get_name()<<" "<<(*it)->get_upper()<<"))"<<endl;
+		ptemp<<"(assert (>= "<<(*it)->get_name()<<" "<<(*it)->get_lower()<<"))"<<endl;
 	}
+
 	result<<vtemp.str()<<ptemp.str();
-	result<<"(assert "<<print_prefix()<<")"<<endl;
+
+	if (polar)
+		result<<"(assert "<<print_prefix()<<")"<<endl;
+	else //give negation
+		result<<"(assert (not "<<print_prefix()<<"))"<<endl;
 	result<<"(check-sat)"<<endl;
 	result<<"(exit)"<<endl;
 
