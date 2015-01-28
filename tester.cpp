@@ -60,7 +60,7 @@ void tester::test_ast2() {
 	x2 -> set_bounds(-10, 10);
 
 	ast* x3 = var("theta");
-	x3 -> set_bounds(-10, 10);
+	x3 -> set_bounds(-4, 4);
 
 	ast* x4 = var("thetad");
 	x4 -> set_bounds(-10, 10);
@@ -92,10 +92,27 @@ void tester::test_ast2() {
 
 	ast* formula1 = land(land(eq(f[3],c0),land(eq(f[1],c0),eq(f[2],c0))),eq(f[4],c0));
 	ast* formula2 = dup(formula1);
-	ast* formula3 = copy_replace(formula1, x3, m);
+	ast* formula3 = substitute(formula1, symbol_table->locate_symbol("thetad"), 
+							symbol_table->locate_symbol("0"));
+	ast* formula4 = substitute(x2, x2, m);
+//	ast* formula4 = copy_replace(formula1, symbol_table->locate_symbol("xd"), 
+//							symbol_table->locate_symbol("1"));
 
-	cout<< formula2 -> print_smt2(true) << endl;
-	cout<< formula3 -> print_smt2(false) <<endl;
+	cout<< formula1 -> print_smt2(true) <<endl;
+//	cout<< formula2 -> print_smt2(true) << endl;
+	cout<< formula3 -> print_smt2(true) <<endl;
+//	cout<< substitute(x2, x2, m) -> print_smt2(true) <<endl;
+//	cout<< formula4 -> print_smt2(true) <<endl;
+
+	map<symbol*, symbol*> sol;
+	get_dreal_solutions(formula1, sol);
+	for (map<symbol*, symbol*>::iterator it = sol.begin(); it!=sol.end(); it++)
+		formula1 = substitute(formula1, it->first, it->second);
+
+	cout<<"original: "<<formula1 -> print_smt2(true)<<endl;
+	simplify(formula1);
+
+	cout<<"simplified: "<<formula1 -> print_smt2(true)<<endl;
 }
 
 void tester::testall() {

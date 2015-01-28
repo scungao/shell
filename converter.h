@@ -10,13 +10,24 @@ public:
 		symbol_table(t) {}
 	inline ~converter() {}
 	inline table*	get_table() {return symbol_table;}
-	ast* replace(ast*, symbol*, symbol*); //substitute symbol by symbol
-	ast* replace(ast*, ast*, ast*);
-	ast* copy_replace(ast*, symbol*, symbol*);
-	ast* copy_replace(ast*, ast*, ast*);//use with caution
-	ast* replace(ast*, symbol*, ast*); //substitute symbol by ast
+//	ast* replace(ast*, symbol*, symbol*); //substitute symbol by symbol
+//	ast* replace(ast*, ast*, ast*);
+//	ast* copy_replace(ast*, symbol*, symbol*);
+//	ast* copy_replace(ast*, ast*, ast*);
+//	ast* replace(ast*, symbol*, ast*); //substitute symbol by ast
+	ast* substitute(ast*, ast*, ast*); //use with caution
+	ast* substitute(ast*, symbol*, symbol*); //need consecutive substitution
+	inline ast* substitute(ast* source, map<ast*, ast*>& m) {
+		map<ast*, ast*>::iterator it;
+		for (it=m.begin(); it!=m.end(); it++) {
+			source = substitute(source, it->first, it->second);
+		}
+		return source;
+	}
 	ast*	process_to_formula(ast*);
 	ast*	dup(ast*);	
+	void	get_dreal_solutions(ast*, map<symbol*, symbol*>&);
+	ast*	simplify(ast*);//compress constants
 
 	inline ast*	add(ast* a1, ast* a2) { 
 		ast* result = new ast(symbol_table->locate_symbol("+")); 
@@ -148,6 +159,25 @@ public:
 		}
 		ast* a = new ast(new_num);
 		return a;
+	}
+
+	inline symbol* num_sym(string s) {
+		symbol* new_num = symbol_table->locate_symbol(s);
+		if (new_num == NULL){ 
+			new_num = new symbol(s, constant, 0);
+			symbol_table -> add(new_num);
+		}
+		return new_num;
+	}
+
+	inline symbol* num_sym(double c) {
+		string s = to_string(c);
+		symbol* new_num = symbol_table->locate_symbol(s);
+		if (new_num == NULL){ 
+			new_num = new symbol(s, constant, 0);
+			symbol_table -> add(new_num);
+		}
+		return new_num;
 	}
 
 	inline ast* var(string s) {

@@ -59,6 +59,13 @@ public:
 	}
 	inline void set_upper (double ub) { upper = ub; }
 	inline void set_lower (double lb) { lower = lb; }
+	inline double get_value() {
+		if (type == constant)
+			return stod(name);
+		else
+			printf("get_value is invalid.\n");
+			return 0.0;
+	}
 	inline bool match (string s) { return (name.compare(s) == 0);}
 };
 

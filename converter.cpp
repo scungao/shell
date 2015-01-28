@@ -1,4 +1,10 @@
 #include "converter.h"
+#include <math.h>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
+using namespace std;
 
 ast* converter::dup(ast* source) {
 	ast* result = new ast();
@@ -11,32 +17,173 @@ ast* converter::dup(ast* source) {
 	return result;
 }
 
-ast* converter::copy_replace(ast* source, symbol* old, symbol* neo) {
-	ast* result = dup(source);
-	replace(result, old, neo);
-	return result;
-}
-
-ast* converter::copy_replace(ast* source, ast* old, ast* neo) {
-	ast* result = dup(source);
-	replace(result, old, neo);
-	return result;
-}
-
-ast* converter::replace(ast* source, symbol* old, symbol* neo) {
-	if (source->get_head_symbol() == old)
-		source -> set_head_symbol(neo);
-	for(int i=0; i<source->get_degree(); i++)
-		replace(source->get_child(i), old, neo);
-	return source;
-}
-
-ast* converter::replace(ast* source, ast* old, ast* neo) {
-	if (source->get_head_symbol() == old->get_head_symbol())
-		source = old;
-	if (source!=NULL) {
-		for(int i=0; i<source->get_degree(); i++)
-			replace(source->get_child(i), old, neo);
+ast* converter::substitute(ast* source, ast* old, ast* neo) {
+	ast* result = new ast();
+	if (source->get_head_symbol() == old->get_head_symbol()) {
+		result -> set_head_symbol(neo->get_head_symbol());	
 	}
-	return source;
+	else {
+		result -> set_head_symbol(source->get_head_symbol());
+	}
+	for (int i=0; i<source->get_degree(); i++)
+		result -> add_child(substitute(source->get_child(i), old, neo));
+	return result;
 }
+
+ast* converter::substitute(ast* source, symbol* old, symbol* neo) {
+	ast* result = dup(source);
+	result -> substitute(old, neo);
+	return result;
+}
+
+void converter::get_dreal_solutions(ast* phi, map<symbol*, symbol*>& sol) {
+/*
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+int main () {
+  ofstream myfile;
+  myfile.open ("example.txt");
+  myfile << "Writing this to a file.\n";
+  myfile.close();
+  return 0;
+}
+*/
+	stringstream s;
+	ofstream	dreal_file;
+	dreal_file.open("dreal_file.smt2");
+
+	sol.clear();
+
+	dreal_file << phi->print_smt2(true);
+	dreal_file.close();
+	
+	system("./dReal --proof --precision 0.01 dreal_file.smt2");
+
+	ifstream	dreal_result;
+	dreal_result.open("dreal_file.smt2.proof");
+
+	char cc;
+	string cline;
+	string	buffer;
+	vector<string>	fields;
+
+	getline(dreal_result, cline);
+
+	if (cline.find("SAT") == 0) {
+		printf("sat answer is returned\n");
+		while (dreal_result.get(cc)) { //collect the fields
+			if ((isalnum(cc)||ispunct(cc))
+			 		&& cc!=',' && cc!= ':' && cc!='[' && cc!= ']')
+				buffer += cc;
+			else {
+				if (!buffer.empty())
+					fields.push_back(buffer);
+				buffer.clear();
+			}
+		}
+		//for (int i=0; i<fields.size(); i++) cout<<fields[i]<<endl;
+	}
+
+	for(int i=0; i<fields.size(); i=i+4) {
+		double a = stod(fields[i+1]);
+		double b = stod(fields[i+2]);
+		symbol* name = symbol_table->locate_symbol(fields[i]);
+		symbol* value = num_sym(to_string(a+0.5*(a-b)));
+		sol.insert(pair<symbol*, symbol*>(name,value));
+	//	cout<<fields[i]<<"["<<fields[i+1]<<","<<fields[i+2]<<"]"<<endl;
+	}
+
+	dreal_result.close();
+}
+
+ast* converter::simplify(ast* a) {
+
+	for (int i=0; i<a->get_degree(); i++) {
+		simplify(a -> get_child(i));
+	}
+
+	if(a->get_degree()==0) return a;
+
+	if (a->get_head_name() == "+") {
+		if (a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant) {
+			double c1 = a->get_child(0)->get_value();
+			double c2 = a->get_child(1)->get_value();
+			double c = c1+c2;
+			a -> set_head_symbol(num_sym(c));
+			a -> clear_children();
+		}
+	}
+	
+	else if (a->get_head_name() == "*") {
+		if (a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant) {
+			double c1 = a->get_child(0)->get_value();
+			double c2 = a->get_child(1)->get_value();
+			double c = c1*c2;
+			a -> set_head_symbol(num_sym(c));
+			a -> clear_children();
+		}
+	}
+	else if (a->get_head_name() == "-") {
+		if (a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant) {
+			double c1 = a->get_child(0)->get_value();
+			double c2 = a->get_child(1)->get_value();
+			double c = c1-c2;
+			a -> set_head_symbol(num_sym(c));
+			a -> clear_children();
+		}
+	}
+	else if (a->get_head_name() == "/") {
+		if (a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant) {
+			double c1 = a->get_child(0)->get_value();
+			double c2 = a->get_child(1)->get_value();
+			double c = c1/c2;
+			a -> set_head_symbol(num_sym(c));
+			a -> clear_children();
+		}
+	}
+	else if (a->get_head_name() == "^") {
+		if (a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant) {
+			double c1 = a->get_child(0)->get_value();
+			double c2 = a->get_child(1)->get_value();
+			double c = ::pow(c1,c2);
+			a -> set_head_symbol(num_sym(c));
+			a -> clear_children();
+		}
+	}
+	else if (a->get_head_name() == "sin") {
+		if (a->get_child_type(0) == constant) {
+			double c1 = a->get_child(0)->get_value();
+			double c = ::sin(c1);
+			a -> set_head_symbol(num_sym(c));
+			a -> clear_children();
+		}
+	}
+	else if (a->get_head_name() == "cos") {
+		if (a->get_child_type(0) == constant) {
+			double c1 = a->get_child(0)->get_value();
+			double c = ::cos(c1);
+			a -> set_head_symbol(num_sym(c));
+			a -> clear_children();
+		}
+	}	
+	else if (a->get_head_name() == "tan") {
+		if (a->get_child_type(0) == constant) {
+			double c1 = a->get_child(0)->get_value();
+			double c = ::tan(c1);
+			a -> set_head_symbol(num_sym(c));
+			a -> clear_children();
+		}
+	}	
+
+	return a;
+
+}
+
+

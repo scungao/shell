@@ -3,8 +3,6 @@
 #include <sstream>
 #include <string>
 
-using namespace std;
-
 ast::ast(symbol* s)
 	:	head_symbol(s), terminal(true), 
 		degree(0), height(0), parent(NULL)
@@ -75,6 +73,14 @@ void ast::add_child(ast* a){
 //	for(it = a->get_parameters_set()->begin(); 
 //			it != a->get_parameters_set()->end(); it++)
 //		add_parameter(*it);
+}
+
+
+void ast::substitute(symbol* old, symbol* neo) {
+	if (get_head_symbol() == old)
+		set_head_symbol(neo);
+	for (int i=0; i< get_degree(); i++)
+		get_child(i)->substitute(old,neo);
 }
 
 string ast::print_prefix() {

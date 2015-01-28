@@ -52,9 +52,14 @@ public:
 	inline string	get_head_name()	{ return head_symbol->get_name(); }
 	inline void 	set_head_symbol(symbol* s) { head_symbol = s; } 
 	inline ast* 	get_child(int i)	{ return children[i]; }
+	inline s_type 	get_child_type(int i) { 
+		return children[i]-> get_head_symbol() -> get_stype(); }
+	inline double 	get_value() { return get_head_symbol()->get_value();}
+	inline void clear_child(int i) { children.erase(children.begin()+i); }
+	inline void clear_children() { children.clear(); }
 	void		add_child(ast*);
 	inline int	get_degree()	{ return children.size(); }
-	//inline void set_degree(int d) { degree=d; }
+	//inline void set_degree(int d) { degree=d; 
 	inline int	get_height()	{ return height; }
 	inline void set_height(int h) { height=h; }
 	inline bool		is_terminal()	{ return terminal; }
@@ -73,6 +78,7 @@ public:
 	inline void set_bounds(double a, double b) {
 		head_symbol->set_upper(b); head_symbol->set_lower(a);
 	}
+	void	substitute(symbol*, symbol*);
 //	void normalize();
 	void collect(set<symbol*>&, s_type);
 	string print_tree();
