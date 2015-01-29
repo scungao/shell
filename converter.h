@@ -48,6 +48,7 @@ public:
 		return partial(a, s->get_head_symbol());
 	}
 
+	ast*	lyapunov(vector<ast*>, vector<ast*>, ast*);
 
 	inline ast*	add(ast* a1, ast* a2) { 
 		ast* result = new ast(symbol_table->locate_symbol("+")); 
@@ -224,8 +225,13 @@ public:
 		return a;
 	}
 
-
-
+	inline ast* monomial(vector<ast*> x, vector<ast*> e, ast* c) {
+		ast* result = c;
+		for (int i=0; i<x.size(); i++) {
+			result = mul(result, pow(x[i], e[i]));
+		}
+		return result;
+	}
 
 
 };

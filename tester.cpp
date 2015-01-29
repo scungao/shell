@@ -51,6 +51,7 @@ void tester::test_ast2() {
 	ast* c2 = num("2");
 	ast* c0 = num("0");
 
+	vector<ast*> x;
 
 //the four variables
 	ast* x1 = var("x");
@@ -68,29 +69,35 @@ void tester::test_ast2() {
 	ast* u = param("u");
 	u -> set_bounds(-10, 10);
 
+	x.push_back(x1);
+	x.push_back(x2);
+	x.push_back(x3);
+	x.push_back(x4);
+
+
 //define the functions
-	ast* f[5]; 
+	vector<ast*> f; 
 
 	//f1
-	f[1] = x2;
+	 f.push_back(x2);
 
 	//f2
 	ast* term21 = mul(mul(mul(m,L),sin(x3)),pow(x4,c2));
 	ast* term22 = mul(m, mul(g, mul( cos(x3), sin(x3))));
 	ast* term23 = add(mul(m, pow(sin(x3), c2)), M);
-	f[2] = div(add(add(term21,term22),u),term23);
+	f.push_back( div(add(add(term21,term22),u),term23) );
 
 	//f3
-	f[3] = x4;
+	f.push_back( x4 );
 
 	//f4
 	ast* term41 = mul(mul(mul(mul(m,L),sin(x3)),cos(x3)),pow(x4,c2));
 	ast* term42 = mul(mul(add(m,M),g),sin(x3));
 	ast* term43 = mul(cos(x3),u);
 	ast* term44 = mul(sub(c0,L),add(mul(m,pow(sin(x3),c2)),M));
-	f[4] = div(add(add(term41,term42),term43),term44);
+	f.push_back( div(add(add(term41,term42),term43),term44) );
 
-	ast* formula1 = land(land(eq(f[3],c0),land(eq(f[1],c0),eq(f[2],c0))),eq(f[4],c0));
+	ast* formula1 = land(land(eq(f[2],c0),land(eq(f[0],c0),eq(f[1],c0))),eq(f[3],c0));
 	ast* formula2 = dup(formula1);
 	ast* formula3 = substitute(formula1, symbol_table->locate_symbol("thetad"), 
 							symbol_table->locate_symbol("0"));
@@ -123,6 +130,14 @@ void tester::test_ast2() {
 	cout << partial(formula6, x2)->print_prefix()<<endl;
 
 	cout<<formula5 -> print_smt2(true)<<endl;
+
+	ast* formula7 = mul(sin(x2),cos(x2));
+	cout<< partial(formula7, x2)->print_prefix()<<endl;
+
+	ast* v = x[0];
+	ast* lcondition = lyapunov(f, x, v);
+
+	cout<<lcondition->print_smt2(true)<<endl;
 
 }
 

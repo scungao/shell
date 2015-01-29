@@ -235,12 +235,58 @@ ast* converter::partial(ast* V, symbol* x) { //change the places that need to be
 							pow(V->get_child(1),num("-2"))
 						);
 	}
+	else if ( V-> get_head_name() == "^") {
+		result = mul(
+						mul(V->get_child(1), pow(V->get_child(0), sub(V->get_child(1), num("1"))))
+						,
+						partial(V->get_child(0),x) //chain rule
+					);
+	}
+	else if (V -> get_head_name() == "sin") {
+		result = mul(
+						cos(V->get_child(0)),
+						partial(V->get_child(0),x)
+					);
+	}
+	else if (V -> get_head_name() == "cos") {
+		result = mul(
+						sub(num("0"), sin(V->get_child(0))),
+						partial(V->get_child(0),x)
+					);
+	}
+	else if (V -> get_head_name() == "tan") {
+		result = mul(
+						add(num("1"), pow(tan(V->get_child(0)), num("2"))),
+						partial(V->get_child(0),x)
+					);
+	}
 	else {
 		result = dup(V);
 	}
 	simplify(result);
 	return result;
 }
+
+
+ast* converter::lyapunov(vector<ast*> f, vector<ast*> x, ast* v) {
+	ast* result;
+	ast* pos_v;
+	ast* neg_dv = num("0");
+
+	pos_v = geq(v, num("0"));
+
+	for (int i=0; i< f.size(); i++) {
+		ast* term = mul(partial(v, x[i]), f[i]);
+		neg_dv = add(term, neg_dv);
+	}
+
+	neg_dv = leq(neg_dv, num("0"));
+	result = land(pos_v, neg_dv);
+
+	simplify(result);
+	return result;
+}
+
 
 
 
