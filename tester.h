@@ -11,6 +11,7 @@ public:
 	void testall();
 	ast* test_ast1();
 	void test_ast2();
+	void pwf();
 };
 
 #endif

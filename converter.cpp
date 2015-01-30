@@ -16,7 +16,7 @@ ast* converter::dup(ast* source) {
 		result -> add_child(dup(source->get_child(i)));
 	return result;
 }
-
+/*
 ast* converter::substitute(ast* source, ast* old, ast* neo) {
 	ast* result = new ast();
 	if (source->get_head_symbol() == old->get_head_symbol()) {
@@ -29,6 +29,7 @@ ast* converter::substitute(ast* source, ast* old, ast* neo) {
 		result -> add_child(substitute(source->get_child(i), old, neo));
 	return result;
 }
+*/
 
 ast* converter::substitute(ast* source, symbol* old, symbol* neo) {
 	ast* result = dup(source);
@@ -36,7 +37,7 @@ ast* converter::substitute(ast* source, symbol* old, symbol* neo) {
 	return result;
 }
 
-void converter::get_dreal_solutions(ast* phi, map<symbol*, symbol*>& sol) {
+bool converter::get_dreal_solutions(ast* phi, map<symbol*, symbol*>& sol, bool polarity) {
 /*
 #include <iostream>
 #include <fstream>
@@ -56,7 +57,7 @@ int main () {
 
 	sol.clear();
 
-	dreal_file << phi->print_smt2(true);
+	dreal_file << phi->print_smt2(polarity);
 	dreal_file.close();
 	
 	system("./dReal --proof --precision 0.01 dreal_file.smt2");
@@ -84,18 +85,22 @@ int main () {
 			}
 		}
 		//for (int i=0; i<fields.size(); i++) cout<<fields[i]<<endl;
-	}
 
-	for(int i=0; i<fields.size(); i=i+4) {
-		double a = stod(fields[i+1]);
-		double b = stod(fields[i+2]);
-		symbol* name = symbol_table->locate_symbol(fields[i]);
-		symbol* value = num_sym(to_string(a+0.5*(a-b)));
-		sol.insert(pair<symbol*, symbol*>(name,value));
-	//	cout<<fields[i]<<"["<<fields[i+1]<<","<<fields[i+2]<<"]"<<endl;
+		for(int i=0; i<fields.size(); i=i+4) {
+			double a = stod(fields[i+1]);
+			double b = stod(fields[i+2]);
+			symbol* name = symbol_table->locate_symbol(fields[i]);
+			symbol* value = num_sym(to_string(0.5*(a+b)));
+			sol.insert(pair<symbol*, symbol*>(name,value));
+			//	cout<<fields[i]<<"["<<fields[i+1]<<","<<fields[i+2]<<"]"<<endl;
+		}
+
+		dreal_result.close();
+		return true;
 	}
 
 	dreal_result.close();
+	return false;
 }
 
 void converter::simplify(ast* a) {
@@ -268,7 +273,7 @@ ast* converter::partial(ast* V, symbol* x) { //change the places that need to be
 }
 
 
-ast* converter::lyapunov(vector<ast*> f, vector<ast*> x, ast* v) {
+ast* converter::lyapunov(vector<ast*>& f, vector<ast*>& x, ast* v) {
 	ast* result;
 	ast* pos_v;
 	ast* neg_dv = num("0");
@@ -286,6 +291,58 @@ ast* converter::lyapunov(vector<ast*> f, vector<ast*> x, ast* v) {
 	simplify(result);
 	return result;
 }
+
+
+bool converter::cegis(ast* phi, vector<ast*>& x, 
+						vector<ast*>& p, map<symbol*,symbol*>& sol) {
+/*
+	1. start with choosing some random values in p
+	2. sub in values in p, solve for the negation of x
+	3. sub in values of x, solve for p
+	4. loop 2-3, but add new values (a ball around it) of x each time into constraint. 
+	5. terminate whenever unsat. 
+*/
+	//vector<double> sol_values;
+	ast* phi_temp = phi;
+	sol.clear();
+	for(int i=0; i<p.size(); i++) {
+		double l = p[i]->get_head_symbol()->get_lower();
+		double u = p[i]->get_head_symbol()->get_upper();
+		//sol_values.push_back(0.5*(l+u));
+		sol.insert(pair<symbol*,symbol*>(p[i]->get_head_symbol(), num_sym(0.5*(l+u))));
+		phi_temp = substitute(phi_temp, p[i], num(0.5*(l+u)));
+	}
+
+	vector<ast*>	different_x_instances;
+	//last bool sends negation:
+	while(get_dreal_solutions(phi_temp, sol, false)) {
+	cout<<"Found counterexamples with: "<<phi_temp -> print_smt2(false);
+		cin.get();
+		cout<<"one round"<<endl;
+		//sol now keeps the counterexample for x
+		phi_temp = phi;
+		for(map<symbol*,symbol*>::iterator it=sol.begin(); it!=sol.end(); it++) {
+			phi_temp = substitute(phi_temp, it->first, it->second);
+		}
+		different_x_instances.push_back(phi_temp);
+		//take conjunction of all learned points
+		for(int i=0; i<different_x_instances.size()-1; i++) { //no need to redo the last one
+			phi_temp = land(different_x_instances[i], phi_temp);
+		}
+
+		cout<<"Find parameters with: "<<phi_temp -> print_smt2(true);
+
+		if (!get_dreal_solutions(phi_temp, sol, true)) return false;
+		//sol now keeps candidates for p
+		phi_temp = phi;
+		for(map<symbol*,symbol*>::iterator it=sol.begin(); it!=sol.end(); it++) {
+			phi_temp = substitute(phi_temp, it->first, it->second);
+		}
+	}
+	return true;	
+}
+
+
 
 
 

@@ -113,7 +113,9 @@ void tester::test_ast2() {
 //	cout<< formula4 -> print_smt2(true) <<endl;
 
 	map<symbol*, symbol*> sol;
-	get_dreal_solutions(formula1, sol);
+
+	get_dreal_solutions(formula1, sol, true);
+
 	for (map<symbol*, symbol*>::iterator it = sol.begin(); it!=sol.end(); it++)
 		formula1 = substitute(formula1, it->first, it->second);
 
@@ -134,16 +136,73 @@ void tester::test_ast2() {
 	ast* formula7 = mul(sin(x2),cos(x2));
 	cout<< partial(formula7, x2)->print_prefix()<<endl;
 
-	ast* v = x[0];
+	ast* v = x[2];
 	ast* lcondition = lyapunov(f, x, v);
 
 	cout<<lcondition->print_smt2(true)<<endl;
 
+	vector<ast*> p;
+	p.push_back(u);
+
+	if (cegis(lcondition, x, p, sol))
+		cout<<"cegis succeeded"<<endl;
+	else
+		cout<<"cegies found no solution"<<endl;
 }
+
+void tester::pwf() {//pendulum with friction
+	vector<ast*> x;
+	vector<ast*> f;
+
+	ast* m = num("1.0");
+	ast* M = num("2.0");
+	ast* L = num("1.0");
+	ast* g = num("9.8");
+	ast* c2 = num("2");
+	ast* c0 = num("0");
+	ast* k = num("1.5");
+
+	x.push_back(var("x1"));
+	x[0]->set_bounds(-2,2);
+
+	x.push_back(var("x2"));
+	x[1]->set_bounds(-2,2);
+
+	f.push_back(x[1]); //f1
+
+	ast* f2part1 = sub(num("0"),mul(div(g,L),sin(x[0])));
+	ast* f2part2 = mul(div(k,m),x[1]);
+	f.push_back(sub(f2part1,f2part2));//f2
+
+	vector<ast*> p;
+
+	p.push_back(var("a"));
+	p[0] -> set_bounds(0,10);
+
+	p.push_back(var("b"));
+	p[1] -> set_bounds(5, 25);
+
+	ast* v; //energy function
+	v = add(mul(p[0],pow(x[1],num(2))), mul(p[1],sub(num("1"),cos(x[0]))));
+
+	ast* lcondition = lyapunov(f, x, v);
+
+	map<symbol*, symbol*> sol;
+
+	if (cegis(lcondition, x, p, sol))
+		cout<<"cegis succeeded"<<endl;
+	else
+		cout<<"cegies found no solution"<<endl;
+
+
+}
+
+
 
 void tester::testall() {
 	//cout<< test_ast1()->print_prefix()<<endl;
 	//cout<<test_ast2()->print_tree();
 	//cout<< test_ast2()->print_smt2(true)<<endl;
-	test_ast2();
+	//test_ast2();
+	pwf();
 } 

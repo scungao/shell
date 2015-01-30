@@ -58,7 +58,10 @@ public:
 	inline ast* 	get_child(int i)	{ return children[i]; }
 	inline s_type 	get_child_type(int i) { 
 		return children[i]-> get_head_symbol() -> get_stype(); }
+
+	//this is only for constants
 	inline double 	get_value() { return get_head_symbol()->get_value();}
+
 	inline void clear_child(int i) { children.erase(children.begin()+i); }
 	inline void clear_children() { 
 	//	for (int i=0; i<get_degree(); i++) 

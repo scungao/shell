@@ -21,9 +21,12 @@ public:
 		a->set_head_symbol(ss);
 	}
 
-
-	ast* substitute(ast*, ast*, ast*); //use with caution
 	ast* substitute(ast*, symbol*, symbol*); //need consecutive substitution
+
+	ast* substitute(ast* source, ast* old, ast* neu) {
+		return substitute(source, old->get_head_symbol(), neu->get_head_symbol());
+	}
+
 	inline ast* substitute(ast* source, map<ast*, ast*>& m) {
 		map<ast*, ast*>::iterator it;
 		for (it=m.begin(); it!=m.end(); it++) {
@@ -31,6 +34,7 @@ public:
 		}
 		return source;
 	}
+
 	inline ast* substitute(ast* source, map<symbol*, symbol*>& m) {
 		map<symbol*, symbol*>::iterator it;
 		for (it=m.begin(); it!=m.end(); it++) {
@@ -40,7 +44,7 @@ public:
 	}
 	ast*	process_to_formula(ast*);
 	ast*	dup(ast*);	
-	void	get_dreal_solutions(ast*, map<symbol*, symbol*>&);
+	bool	get_dreal_solutions(ast*, map<symbol*, symbol*>&, bool);
 	void	simplify(ast*);//compress constants
 
 	ast*	partial(ast*, symbol*);
@@ -48,7 +52,8 @@ public:
 		return partial(a, s->get_head_symbol());
 	}
 
-	ast*	lyapunov(vector<ast*>, vector<ast*>, ast*);
+	ast*	lyapunov(vector<ast*>&, vector<ast*>&, ast*);
+	bool	cegis(ast*, vector<ast*>&, vector<ast*>&, map<symbol*, symbol*>&);
 
 	inline ast*	add(ast* a1, ast* a2) { 
 		ast* result = new ast(symbol_table->locate_symbol("+")); 
@@ -185,6 +190,12 @@ public:
 		ast* a = new ast(new_num);
 		return a;
 	}
+
+	inline ast* num(double c) {
+		string s = to_string(c);
+		return num(s);
+	}
+
 
 	inline symbol* num_sym(string s) {
 		symbol* new_num = symbol_table->locate_symbol(s);
