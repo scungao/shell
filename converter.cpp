@@ -59,7 +59,7 @@ int main () {
 
 	dreal_file << phi->print_smt2(polarity);
 	dreal_file.close();
-	
+
 	system("./dReal --proof --precision 0.01 dreal_file.smt2");
 
 	ifstream	dreal_result;
@@ -73,7 +73,7 @@ int main () {
 	getline(dreal_result, cline);
 
 	if (cline.find("SAT") == 0) {
-		printf("sat answer is returned\n");
+//		printf("sat answer is returned\n");
 		while (dreal_result.get(cc)) { //collect the fields
 			if ((isalnum(cc)||ispunct(cc))
 			 		&& cc!=',' && cc!= ':' && cc!='[' && cc!= ']')
@@ -87,6 +87,14 @@ int main () {
 		//for (int i=0; i<fields.size(); i++) cout<<fields[i]<<endl;
 
 		for(int i=0; i<fields.size(); i=i+4) {
+
+			//avoid underflow
+			if (fields[i+1].find("e-308")!= std::string::npos)
+				fields[i+1] = "0";
+
+			if (fields[i+2].find("e-308")!= std::string::npos)
+				fields[i+2] = "0";
+
 			double a = stod(fields[i+1]);
 			double b = stod(fields[i+2]);
 			symbol* name = symbol_table->locate_symbol(fields[i]);
@@ -294,7 +302,7 @@ ast* converter::lyapunov(vector<ast*>& f, vector<ast*>& x, ast* v) {
 
 
 bool converter::cegis(ast* phi, vector<ast*>& x, 
-						vector<ast*>& p, map<symbol*,symbol*>& sol) {
+						vector<ast*>& p, map<symbol*,symbol*>& sol, double delta) {
 /*
 	1. start with choosing some random values in p
 	2. sub in values in p, solve for the negation of x
@@ -304,6 +312,7 @@ bool converter::cegis(ast* phi, vector<ast*>& x,
 */
 	//vector<double> sol_values;
 	ast* phi_temp = phi;
+	ast* phi_sol = leq(num(0),num(1)); //top
 	sol.clear();
 	for(int i=0; i<p.size(); i++) {
 		double l = p[i]->get_head_symbol()->get_lower();
@@ -312,32 +321,62 @@ bool converter::cegis(ast* phi, vector<ast*>& x,
 		sol.insert(pair<symbol*,symbol*>(p[i]->get_head_symbol(), num_sym(0.5*(l+u))));
 		phi_temp = substitute(phi_temp, p[i], num(0.5*(l+u)));
 	}
+	phi_temp = lnot(phi_temp);
 
 	vector<ast*>	different_x_instances;
+	vector<ast*>	explored_ctx; //explored counterexamples
 	//last bool sends negation:
-	while(get_dreal_solutions(phi_temp, sol, false)) {
-	cout<<"Found counterexamples with: "<<phi_temp -> print_smt2(false);
-		cin.get();
-		cout<<"one round"<<endl;
+	int counter=0;
+	while(get_dreal_solutions(phi_temp, sol, true)) {
+		cout<<"Found counterexamples with: "<<phi_temp -> print_smt2(true);
+		//cin.get();
+		
 		//sol now keeps the counterexample for x
 		phi_temp = phi;
+		phi_sol = leq(num(0),num(1)); //phi_sol will encode conditions for excluding explored examples
+
+		cout<<"counterexamples:"<<endl;
 		for(map<symbol*,symbol*>::iterator it=sol.begin(); it!=sol.end(); it++) {
+			cout<< it->first->get_name()<<" : "<<it->second->get_name()<<endl;
 			phi_temp = substitute(phi_temp, it->first, it->second);
+			phi_sol = land(
+						lor( 
+							geq(sub(var(it->first->get_name()), num(it->second->get_name())), 
+								num(delta)),
+							geq(num(-delta), 
+								sub(var(it->first->get_name()), num(it->second->get_name())))
+				  	  	),
+				  	  	phi_sol
+				  	  );	
 		}
 		different_x_instances.push_back(phi_temp);
+		explored_ctx.push_back(phi_sol); //store the negation
 		//take conjunction of all learned points
 		for(int i=0; i<different_x_instances.size()-1; i++) { //no need to redo the last one
 			phi_temp = land(different_x_instances[i], phi_temp);
 		}
 
+		simplify(phi_temp);
 		cout<<"Find parameters with: "<<phi_temp -> print_smt2(true);
 
 		if (!get_dreal_solutions(phi_temp, sol, true)) return false;
 		//sol now keeps candidates for p
+
 		phi_temp = phi;
+
+		cout<<"candidates:"<<endl;
+
 		for(map<symbol*,symbol*>::iterator it=sol.begin(); it!=sol.end(); it++) {
+			cout<< it->first->get_name()<<" : "<<it->second->get_name()<<endl;
 			phi_temp = substitute(phi_temp, it->first, it->second);
 		}
+		phi_temp = lnot(phi_temp);
+
+		for(int i=0; i<explored_ctx.size(); i++) { //need the last one
+			phi_temp = land(explored_ctx[i], phi_temp);
+		}
+
+		cout<<"round: "<<counter++<<endl;
 	}
 	return true;	
 }

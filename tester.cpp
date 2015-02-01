@@ -144,7 +144,7 @@ void tester::test_ast2() {
 	vector<ast*> p;
 	p.push_back(u);
 
-	if (cegis(lcondition, x, p, sol))
+	if (cegis(lcondition, x, p, sol, 0.1))
 		cout<<"cegis succeeded"<<endl;
 	else
 		cout<<"cegies found no solution"<<endl;
@@ -155,18 +155,22 @@ void tester::pwf() {//pendulum with friction
 	vector<ast*> f;
 
 	ast* m = num("1.0");
+//	ast* m = var("m");
 	ast* M = num("2.0");
 	ast* L = num("1.0");
+//	ast* L = var("L");
 	ast* g = num("9.8");
+//	ast* g = var("g");		
 	ast* c2 = num("2");
 	ast* c0 = num("0");
 	ast* k = num("1.5");
+//	ast* k = var("k");
 
 	x.push_back(var("x1"));
-	x[0]->set_bounds(-2,2);
+	x[0]->set_bounds(-1,1);
 
 	x.push_back(var("x2"));
-	x[1]->set_bounds(-2,2);
+	x[1]->set_bounds(-1,1);
 
 	f.push_back(x[1]); //f1
 
@@ -177,20 +181,23 @@ void tester::pwf() {//pendulum with friction
 	vector<ast*> p;
 
 	p.push_back(var("a"));
-	p[0] -> set_bounds(0,10);
+	p[0] -> set_bounds(6,100);
 
 	p.push_back(var("b"));
-	p[1] -> set_bounds(5, 25);
+	p[1] -> set_bounds(5, 200);
 
 	ast* v; //energy function
 	v = add(mul(p[0],pow(x[1],num(2))), mul(p[1],sub(num("1"),cos(x[0]))));
+//	v = add(mul(p[0],pow(x[1],num(2))), mul(p[1],pow(sub(num("1"),cos(x[0])),num("3"))));
+
 
 	ast* lcondition = lyapunov(f, x, v);
 
 	map<symbol*, symbol*> sol;
 
-	if (cegis(lcondition, x, p, sol))
+	if (cegis(lcondition, x, p, sol, 0.1)) {
 		cout<<"cegis succeeded"<<endl;
+	}
 	else
 		cout<<"cegies found no solution"<<endl;
 

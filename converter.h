@@ -53,7 +53,7 @@ public:
 	}
 
 	ast*	lyapunov(vector<ast*>&, vector<ast*>&, ast*);
-	bool	cegis(ast*, vector<ast*>&, vector<ast*>&, map<symbol*, symbol*>&);
+	bool	cegis(ast*, vector<ast*>&, vector<ast*>&, map<symbol*, symbol*>&, double);
 
 	inline ast*	add(ast* a1, ast* a2) { 
 		ast* result = new ast(symbol_table->locate_symbol("+")); 
@@ -243,7 +243,6 @@ public:
 		}
 		return result;
 	}
-
 
 };
 

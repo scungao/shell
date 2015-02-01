@@ -20,6 +20,10 @@ int main() {
 	string command;
 	string subcommand;
 
+	test_suite.testall();
+	return 0;
+
+//needs nothing below for now
 	cout<<"\033[36m"<<"cda$ "<<"\033[0m";
 	cin.get(current_char);
 
