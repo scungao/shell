@@ -12,6 +12,8 @@ public:
 	ast* test_ast1();
 	void test_ast2();
 	void pwf();
+	void ipc();
+	void simple();
 };
 
 #endif

@@ -1,5 +1,5 @@
 CC = g++
-FLAGS = 
+FLAGS = -O3 
 INCUDE = -I/usr/local/include/boost/
 all: cda 
 cda: main ast table parser converter tester

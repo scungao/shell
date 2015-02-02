@@ -89,10 +89,13 @@ int main () {
 		for(int i=0; i<fields.size(); i=i+4) {
 
 			//avoid underflow
-			if (fields[i+1].find("e-308")!= std::string::npos)
+			if (fields[i+1][(fields[i+1]).size()-5]=='e'&& 
+					fields[i+1][(fields[i+1]).size()-4]=='-')
 				fields[i+1] = "0";
 
-			if (fields[i+2].find("e-308")!= std::string::npos)
+			if (fields[i+2][(fields[i+2]).size()-5]=='e'&& 
+					fields[i+2][(fields[i+2]).size()-4]=='-')
+//			if (fields[i+2].find("e-308")!= std::string::npos)
 				fields[i+2] = "0";
 
 			double a = stod(fields[i+1]);
@@ -102,6 +105,10 @@ int main () {
 			sol.insert(pair<symbol*, symbol*>(name,value));
 			//	cout<<fields[i]<<"["<<fields[i+1]<<","<<fields[i+2]<<"]"<<endl;
 		}
+
+		for(map<symbol*,symbol*>::iterator it=sol.begin(); it!=sol.end(); it++) {
+			cout<< it->first->get_name()<<" : "<<it->second->get_name()<<endl;
+		}	
 
 		dreal_result.close();
 		return true;

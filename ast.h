@@ -94,6 +94,7 @@ public:
 	void collect(set<symbol*>&, s_type);
 	string print_tree();
 	string print_prefix();
+	string print_infix();
 	string print_smt2(bool);//bool sets the formula or its negation
 
 

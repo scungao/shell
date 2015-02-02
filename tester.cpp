@@ -98,6 +98,9 @@ void tester::test_ast2() {
 	f.push_back( div(add(add(term41,term42),term43),term44) );
 
 	ast* formula1 = land(land(eq(f[2],c0),land(eq(f[0],c0),eq(f[1],c0))),eq(f[3],c0));
+
+
+
 	ast* formula2 = dup(formula1);
 	ast* formula3 = substitute(formula1, symbol_table->locate_symbol("thetad"), 
 							symbol_table->locate_symbol("0"));
@@ -205,11 +208,181 @@ void tester::pwf() {//pendulum with friction
 }
 
 
+void tester::simple() {
+	vector<ast*> x;
+	vector<ast*> f;
+	vector<ast*> p;
+	ast* v;
+
+	x.push_back(var("x"));
+	x[0]->set_bounds(-1,1);
+
+	p.push_back(var("a"));
+	p[0]->set_bounds(0, 10);
+
+	p.push_back(var("b"));
+	p[1]->set_bounds(-5,10);
+
+	f.push_back(sub(
+					add(pow(x[0],num("3")),pow(x[0],num("2"))), 
+					mul(p[0],x[0])
+					)
+				);
+
+	v = add(p[1], pow(x[0],num("4")));
+
+	ast* lcondition = lyapunov(f, x, v);
+
+	map<symbol*, symbol*> sol;
+
+	if (cegis(lcondition, x, p, sol, 0.1)) {
+		cout<<"cegis succeeded"<<endl;
+	}
+	else
+		cout<<"cegies found no solution"<<endl;
+
+
+}
+
+
+void tester::ipc() {
+	ast* m = num("1.0");
+	ast* M = num("2.0");
+	ast* L = num("1.0");
+	ast* g = num("9.8");
+	ast* c2 = num("2");
+	ast* c0 = num("0");
+
+	vector<ast*> x;
+
+//the four variables
+	ast* x1 = var("x");
+	x1 -> set_bounds(-1.5, 1.5);
+
+	ast* x2 = var("xd");
+	x2 -> set_bounds(-1, 1);
+
+	ast* x3 = var("theta");
+	x3 -> set_bounds(-0.5, 0.5);
+
+	ast* x4 = var("thetad");
+	x4 -> set_bounds(-1, 1);
+
+	x.push_back(x1);
+	x.push_back(x2);
+	x.push_back(x3);
+	x.push_back(x4);
+
+	vector<ast*> p;
+
+	ast* kp = var("kp");
+	kp->set_bounds(0,30);
+
+	ast* kl = var("kl");
+	kl->set_bounds(0,25);
+
+	ast* ki = var("ki");
+	ki->set_bounds(0,20);
+
+
+	p.push_back(kp);
+	p.push_back(kl);
+	p.push_back(ki);
+
+
+	ast* ksi = add(div(x1,L),mul(kp,sin(x3)));
+	cout<<"ksi: "<<ksi->print_infix()<<endl;
+
+	ast* delta = div(M,m);
+
+	ast* pksi = add(div(x2,L),mul(mul(kp,x4),cos(x3)));
+	cout<<"pksi: "<<pksi->print_infix()<<endl;
+	
+	
+	ast* itax = add(mul(ki,ksi),mul(kp,mul(sin(x3), 
+							sub(cos(x3), pow(x4,num(2))) )));
+	cout<<"itax: "<<itax->print_infix()<<endl;
+		
+	ast* deltatheta = sub(add(num(1), kl), mul(kp, pow(cos(x3),num(2))));
+	cout<<"deltatheta: "<<deltatheta->print_infix()<<endl;
+	
+
+	ast* veta = sub(num(0),
+			   div(add(pksi,itax),deltatheta));
+	cout<<"veta: "<<veta->print_infix()<<endl;
+
+	ast* u = add(
+			sub(mul(cos(x3),sin(x3)),mul(pow(x4,num(2)),sin(x3))),
+			mul(veta,add(pow(sin(x3),num(2)),delta))
+			);
+	simplify(u);
+	cout<<"u: "<<u->print_infix()<<endl;
+
+	ast* phix = add(
+					sub(mul(kp,sub(num(1),cos(x3))),
+						mul(num(0.5),mul(kp,pow(x4,num(2))))),
+					mul(num(0.5),pow(div(x2,L),num(2)))
+					);
+	cout<<"phix: "<<phix->print_infix()<<endl;
+
+	ast* V = add(add(mul(mul(num(0.5),ki),pow(ksi,num(2))),
+				 	 mul(num(0.5),pow(pksi,num(2)))),
+				 mul(kl, phix)
+				);
+	cout<<"V: "<<V->print_infix()<<endl;
+
+//define the functions
+	vector<ast*> f; 
+
+	//f1
+	 f.push_back(x2);
+
+	//f2
+	ast* term21 = mul(mul(mul(m,L),sin(x3)),pow(x4,c2));
+	ast* term22 = mul(m, mul(g, mul(cos(x3), sin(x3))));
+	ast* term23 = add(mul(m, pow(sin(x3), c2)), M);
+	f.push_back( div(add(add(term21,sub(num("0"),term22)),u),term23) );
+	simplify(f[1]);
+	cout<<"f2: "<<f[1]->print_infix()<<endl;
+
+	//f3
+	f.push_back( x4 );
+
+	//f4
+	ast* term41 = mul(mul(mul(mul(m,L),sin(x3)),cos(x3)),pow(x4,c2));
+	ast* term42 = mul(mul(add(m,M),g),sin(x3));
+	ast* term43 = mul(cos(x3),u);
+	ast* term44 = mul(L,add(mul(m,pow(sin(x3),c2)),M));
+	f.push_back(div(add(add(sub(num("0"),term41),term42),sub(num("0"),term43)),term44) );
+	simplify(f[3]);
+	cout<<"f4: "<<f[3]->print_infix()<<endl;
+
+
+//	ast* formula1 = land(land(eq(f[2],c0),land(eq(f[0],c0),eq(f[1],c0))),eq(f[3],c0));
+//	simplify(formula1);
+//	cout<<formula1->print_infix()<<endl;
+//	get_dreal_solutions(formula1, sol, true);
+	
+	ast* lcondition = lyapunov(f, x, V);
+//	ast* lcondition = gt(x1,num(0));
+
+	map<symbol*, symbol*> sol;
+
+	if (cegis(lcondition, x, p, sol, 0.1)) {
+		cout<<"cegis succeeded"<<endl;
+	}
+	else
+		cout<<"cegies found no solution"<<endl;
+
+}
+
 
 void tester::testall() {
 	//cout<< test_ast1()->print_prefix()<<endl;
 	//cout<<test_ast2()->print_tree();
 	//cout<< test_ast2()->print_smt2(true)<<endl;
 	//test_ast2();
-	pwf();
+	//pwf();
+	//simple();
+	ipc();
 } 

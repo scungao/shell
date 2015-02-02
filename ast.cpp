@@ -94,6 +94,26 @@ string ast::print_prefix() {
 	return result.str();
 }
 
+string ast::print_infix() {
+	stringstream result;
+	if (get_degree() > 1 ){
+		result<<"(";
+	} 
+
+	if (get_degree()<=1)
+		result<<get_head_name();
+
+	if (get_degree()==1)
+		result<<"(";
+
+	for (int i=0; i<children.size(); i++) {
+		result <<children[i]->print_infix();
+		if (i<children.size()-1) result<< get_head_name();
+	}
+	if (get_degree() >= 1 ) result<<")";
+	return result.str();
+}
+
 string ast::print_tree() {
 	stringstream result;
 	result<<get_head_name()<<endl;
