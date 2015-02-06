@@ -6,6 +6,7 @@
 class converter {
 	table*	symbol_table;
 public:
+	inline converter() {}
 	inline converter(table* t):
 		symbol_table(t) {}
 	inline ~converter() {}
@@ -243,6 +244,10 @@ public:
 		}
 		return result;
 	}
+
+
+
+
 
 };
 

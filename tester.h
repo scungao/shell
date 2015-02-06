@@ -14,6 +14,8 @@ public:
 	void pwf();
 	void ipc();
 	void simple();
+	void cubli();
+	void powertest();
 };
 
 #endif

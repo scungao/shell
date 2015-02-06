@@ -2,10 +2,12 @@ CC = g++
 FLAGS = -O3 
 INCUDE = -I/usr/local/include/boost/
 all: cda 
-cda: main ast table parser converter tester
-	$(CC) $(FLAGS) main.o ast.o table.o parser.o converter.o tester.o -o cda
+cda: main ast table parser converter tester power
+	$(CC) $(FLAGS) main.o ast.o table.o parser.o converter.o tester.o power.o -o cda
 main: main.cpp
 	$(CC) $(FLAGS) -c main.cpp
+power: power.cpp
+	$(CC) $(FLAGS) -c power.cpp
 ast: ast.cpp 
 	$(CC) $(FLAGS) -c ast.cpp
 table: table.cpp

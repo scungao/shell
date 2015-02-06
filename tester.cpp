@@ -1,10 +1,23 @@
 #include <iostream>
 #include "tester.h"
+#include "power.h"
 
 using namespace std;
 
 tester::tester(table* st):
 	symbol_table(st), converter(st) {}
+
+void tester::powertest(){
+	double b[5][5];
+	double g[5][5];
+	power_grid	grid(symbol_table, 5);
+//	grid.add_line(1,2);
+//	grid.add_line(0,1);
+//	grid.add_line(0,2);
+	
+//	cout<< grid.p(1) -> print_infix() <<endl ;
+//	cout<< grid.q(1) -> print_infix() <<endl ;
+}
 
 ast* tester::test_ast1() {
 
@@ -362,7 +375,7 @@ void tester::ipc() {
 //	simplify(formula1);
 //	cout<<formula1->print_infix()<<endl;
 //	get_dreal_solutions(formula1, sol, true);
-	
+
 	ast* lcondition = lyapunov(f, x, V);
 //	ast* lcondition = gt(x1,num(0));
 
@@ -372,7 +385,27 @@ void tester::ipc() {
 		cout<<"cegis succeeded"<<endl;
 	}
 	else
-		cout<<"cegies found no solution"<<endl;
+		cout<<"cegis found no solution"<<endl;
+
+}
+
+
+void tester::cubli() {
+	vector<ast*> x;
+	vector<ast*> f;
+	vector<ast*> p;
+
+	ast* phi = var("phi");
+	x.push_back(phi);
+	phi->set_bounds(-1,1);
+
+	ast* p_phi = var("p_phi");
+	x.push_back(p_phi);
+	p_phi->set_bounds(-5,5);
+
+	ast* p_psi = var("p_psi");
+	x.push_back(p_psi);
+	p_psi->set_bounds(-5,5);
 
 }
 
@@ -384,5 +417,6 @@ void tester::testall() {
 	//test_ast2();
 	//pwf();
 	//simple();
-	ipc();
+	//ipc();
+	powertest();
 } 
