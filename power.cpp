@@ -195,7 +195,7 @@ ast* power_grid::est() {
 	ast* result = num("0");
 	ast* component = num("0");
 
-	for (int i=0; i<1; i++) {
+	for (int i=0; i<size; i++) {
 //		for (int j=0; j<neighbors[i]->size(); j++) {
 			component = add(
 							component,
