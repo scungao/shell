@@ -25,9 +25,16 @@ power_grid::power_grid(table* t, int n)
 	//	cout<<v<<" "<<theta;
 	
 		ast* a1 = var(v);
+		a1->set_bounds(-2,2);
+
 		ast* a2 = var(theta);
+		a2 -> set_bounds(-4,4);
+
 		ast* a3 = var(v_hat);
+		a3 -> set_bounds(-2,2);
+
 		ast* a4 = var(t_hat);
+		a4 -> set_bounds(-4,4);
 
 		volts.push_back(a1);
 		phasors.push_back(a2);
@@ -39,8 +46,8 @@ power_grid::power_grid(table* t, int n)
 		xhat.push_back(a3);
 		xhat.push_back(a4);
 
-		b[i].resize(size,0.0);
-		g[i].resize(size,0.0);
+		b[i].resize(size,0.2);
+		g[i].resize(size,0.3);
 		sigma2[i].resize(size,0.00001);
 
 		for (int j =0; j<size; j++) {
@@ -63,6 +70,18 @@ power_grid::power_grid(table* t, int n)
 			zphn += to_string(j);
 			zqhn += to_string(j);
 
+			ast* zpv = var(zpn);
+			zpv -> set_bounds(-0.5,0.5);
+
+			ast* zqv = var(zqn);
+			zqv -> set_bounds(-0.5,0.5);
+	
+			ast* zphv = var(zphn);
+			zphv -> set_bounds(-0.5,0.5);
+	
+			ast* zqhv = var(zqhn);
+			zqhv -> set_bounds(-0.5,0.5);
+	
 			zp[i].push_back(var(zpn));
 			zq[i].push_back(var(zqn));
 			zph[i].push_back(var(zphn));
@@ -98,6 +117,11 @@ void power_grid::add_line(int i, int j) {
 ast* power_grid::p(int i, vector<ast*>& v, vector<ast*>& t) {
 	ast* result;
 	result = num("0");
+	
+	if (neighbors[i]==NULL){
+		return result;
+	}
+
 	for(set<int>::iterator it = neighbors[i]->begin();
 								it != neighbors[i]->end(); it++) 
 	{
@@ -113,6 +137,7 @@ ast* power_grid::p(int i, vector<ast*>& v, vector<ast*>& t) {
 				 		)
 					);
 	}
+
 	result = mul(v[i], result);
 	simplify(result);
 	return result;
@@ -122,6 +147,10 @@ ast* power_grid::p(int i, vector<ast*>& v, vector<ast*>& t) {
 ast* power_grid::q(int i,vector<ast*>& v, vector<ast*>& t) {
 	ast* result;
 	result = num("0");
+
+	if (neighbors[i]==NULL){
+		return result;
+	}
 
 	for(set<int>::iterator it = neighbors[i]->begin();
 								it != neighbors[i]->end(); it++) 
@@ -166,32 +195,35 @@ ast* power_grid::est() {
 	ast* result = num("0");
 	ast* component = num("0");
 
-	for (int i=0; i<size; i++) {
-		for (int j=0; j<size; j++) {
+	for (int i=0; i<1; i++) {
+//		for (int j=0; j<neighbors[i]->size(); j++) {
 			component = add(
 							component,
 							div(
 								mul(
 									sub(zp[i][i],p(i,vhat,thehat)),
-									partial(p(i,vhat,thehat),vhat[j])
+									partial(p(i,vhat,thehat),vhat[0])
 									), 
-								num(sigma2[i][j])
+								num(sigma2[i][0])
 								)
 							);
 			component = add(
 							component,
 							div(
 								mul(sub(zp[i][i],p(i,vhat,thehat)),
-									partial(p(i,vhat,thehat),thehat[j])
+									partial(p(i,vhat,thehat),thehat[0])
 									), 
-								num(sigma2[i][j])
+								num(sigma2[i][0])
 								)
 							);
-		}
-		for(int j = 0; j<neighbors[i]->size(); j++) {
-			break;
-		}
+//		}
+		//for(int j = 0; j<neighbors[i]->size(); j++) {
+		//	break;
+		//}
 	}
+	result = eq(component, num("0"));
+	simplify(result);
+
 	return result;
 }
 

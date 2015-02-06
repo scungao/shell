@@ -87,6 +87,7 @@ public:
 	inline void set_upper(double a) {head_symbol->set_upper(a);}
 	inline void set_lower(double a) {head_symbol->set_lower(a);}
 	inline void set_bounds(double a, double b) {
+		head_symbol->set_dtype(real);
 		head_symbol->set_upper(b); head_symbol->set_lower(a);
 	}
 	void	substitute(symbol*, symbol*);

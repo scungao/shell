@@ -3,7 +3,6 @@
 
 #include <string>
 #include <assert.h>
-#include "interval.h"
 
 using namespace std;
 

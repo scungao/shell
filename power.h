@@ -20,8 +20,8 @@ class power_grid : public converter {
 	vector< vector<ast*> > zph; //z hats
 	vector< vector<ast*> > zqh;
 	map<int,set<int>*>	neighbors; 
-	vector< vector<int> >	b;
-	vector< vector<int> >	g;
+	vector< vector<double> >	b;
+	vector< vector<double> >	g;
 	vector< vector<double> > sigma2; //p and q share sigma for now
 	//vector<vector<int>> b;
 	//vector<vector<int>> g;

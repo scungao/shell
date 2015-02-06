@@ -8,13 +8,18 @@ tester::tester(table* st):
 	symbol_table(st), converter(st) {}
 
 void tester::powertest(){
-	double b[5][5];
-	double g[5][5];
-	power_grid	grid(symbol_table, 5);
-//	grid.add_line(1,2);
-//	grid.add_line(0,1);
-//	grid.add_line(0,2);
+	//double b[5][5];
+	//double g[5][5];
+	power_grid	grid(symbol_table, 3);
+	grid.add_line(1,2);
+	grid.add_line(0,1);
+	grid.add_line(0,2);
+
+	ast* f1 = grid.est();
+	cout<<f1->print_smt2(true)<<endl;
 	
+	map<symbol*, symbol*>	sol;
+	get_dreal_solutions(f1,sol,true);
 //	cout<< grid.p(1) -> print_infix() <<endl ;
 //	cout<< grid.q(1) -> print_infix() <<endl ;
 }
