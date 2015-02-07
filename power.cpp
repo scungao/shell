@@ -10,6 +10,8 @@ power_grid::power_grid(table* t, int n)
 	zq.resize(size);
 	zph.resize(size);
 	zqh.resize(size);
+	ap.resize(size);
+	aq.resize(size);
 	sigma2.resize(size);
 
 	for (int i = 0; i<size; i++) {
@@ -55,6 +57,8 @@ power_grid::power_grid(table* t, int n)
 			string zqn = "zq_";
 			string zphn = "zph_";
 			string zqhn = "zqh_";
+			string apn = "ap_";
+			string aqn = "aq_";
 
 			zpn += to_string(i);
 			zqn += to_string(i);
@@ -70,6 +74,13 @@ power_grid::power_grid(table* t, int n)
 			zphn += to_string(j);
 			zqhn += to_string(j);
 
+			apn += to_string(i);
+			aqn += to_string(i);
+			apn += "_";
+			aqn += "_";
+			apn += to_string(j);
+			aqn += to_string(j);
+
 			ast* zpv = var(zpn);
 			zpv -> set_bounds(-0.5,0.5);
 
@@ -81,11 +92,20 @@ power_grid::power_grid(table* t, int n)
 	
 			ast* zqhv = var(zqhn);
 			zqhv -> set_bounds(-0.5,0.5);
+
+			ast* apv = var(apn);
+			apv -> set_bounds(-10,10);
+
+			ast* aqv = var(aqn);
+			aqv -> set_bounds(-10,10);
+
 	
-			zp[i].push_back(var(zpn));
-			zq[i].push_back(var(zqn));
-			zph[i].push_back(var(zphn));
-			zqh[i].push_back(var(zqhn));
+			zp[i].push_back(zpv);
+			zq[i].push_back(zqv);
+			zph[i].push_back(zphv);
+			zqh[i].push_back(zqhv);
+			aq[i].push_back(aqv);
+			ap[i].push_back(apv);
 		}
 
 	}	
@@ -209,8 +229,72 @@ ast* power_grid::mf() {
 			}
 		}
 	}
+	simplify(result);
 	return result;
 }
+
+ast* power_grid::attack() {
+	ast* result = top();
+	for (int i=0; i<size; i++) {
+		ast* a1 = eq( zph[i][i], add(zp[i][i], ap[i][i]));
+		ast* a2 = eq( zqh[i][i], add(zq[i][i], aq[i][i]));
+		result = land(result,land(a1, a2));
+		if (neighbors[i]!=NULL) {
+			for (set<int>::iterator it = neighbors[i]->begin();
+					it != neighbors[i]->end(); it++) {
+				int j = *it;
+				if (j > i) {
+					ast* a3 = eq(zph[i][j],add(zp[i][j], ap[i][j]));
+					ast* a4 = eq(zqh[i][j],add(zq[i][j], aq[i][j]));	
+					result = land(result, land(a3, a4));				
+				} 
+			}
+		}		
+	}
+	simplify(result);
+	return result;
+}
+
+
+ast* power_grid::monitor(double tau) {
+	ast* result = top();
+	for (int i=0; i<size; i++) {//todo: change this to e bounds
+		ast* a1 = sub( zph[i][i], p(i,vhat,thehat));  
+		ast* a2 = sub( zqh[i][i], q(i,vhat,thehat));  
+		ast* b1 = land(lt(a1,num(tau)), gt(a1, sub(num(0),num(tau))));
+		ast* b2 = land(lt(a2,num(tau)), gt(a2, sub(num(0),num(tau))));
+		result = land(result,land(b1, b2));
+		if (neighbors[i]!=NULL) {
+			for (set<int>::iterator it = neighbors[i]->begin();
+					it != neighbors[i]->end(); it++) {
+				int j = *it;
+				if (j > i) {
+					ast* a3 = sub(zph[i][j],p(i,j,vhat,thehat));
+					ast* a4 = sub(zqh[i][j],q(i,j,vhat,thehat));	
+					ast* b3 = land(lt(a3,num(tau)), gt(a3, sub(num(0),num(tau))));
+					ast* b4 = land(lt(a4,num(tau)), gt(a4, sub(num(0),num(tau))));					
+					result = land(result, land(b3, b4));				
+				} 
+			}
+		}
+	}
+	simplify(result);
+	return result;
+}
+
+ast* power_grid::unsafe(double eps) {
+	ast* result = num(0);
+	for (int i=0; i<size; i++) {
+		ast* a1 = sub(volts[i], vhat[i]);
+		ast* a2 = sub(phasors[i], thehat[i]);
+		ast* a3 = add(pow(a1,num(2)),pow(a2,num(2)));
+		result = add(result,a3);
+	}
+	result = geq(result,num(eps));
+	simplify(result);
+	return result;
+}
+
 
 ast* power_grid::est() { 
 	ast* result = top();
@@ -272,6 +356,66 @@ ast* power_grid::est() {
 	return result;
 }
 
+
+ast* power_grid::esth() { 
+	ast* result = top();
+	ast* component = num("0");
+
+	for (int i=0; i<size; i++) {
+		for (int j=0; j<size ; j++) {
+			component = add(
+							component,
+							div(
+								mul(
+									sub(zph[j][j],p(j,vhat,thehat)),
+									partial(p(j,vhat,thehat),vhat[i])
+									), 
+								num(sigma2[j][j])
+								)
+							);
+			component = add(
+							component,
+							div(
+								mul(sub(zqh[j][j],q(j,vhat,thehat)),
+									partial(q(i,vhat,thehat),thehat[i])
+									), 
+								num(sigma2[j][j])
+								)
+							);
+			if (neighbors[j]!=NULL) {
+				for (set<int>::iterator it=neighbors[j]->begin();
+									it != neighbors[j]->end(); it++) {
+					int k = *it;
+					if (k>j) {
+						component = add(
+										component,
+										div(
+											mul(
+												sub(zph[j][k],p(j,k,vhat,thehat)),
+												partial(p(j,k,vhat,thehat),vhat[i])
+											), 
+											num(sigma2[j][k])
+										)
+									);
+						component = add(
+										component,
+										div(
+											mul(sub(zqh[j][k],q(j,k,vhat,thehat)),
+											partial(q(j,k,vhat,thehat),thehat[i])
+											), 
+											num(sigma2[j][k])
+										)
+									);
+					}
+				}
+			}
+		}
+		result = land(result, eq(component, num("0")));
+		component = num("0");
+	}
+	simplify(result);
+	return result;
+}
 
 
 

@@ -57,6 +57,7 @@ int main () {
 
 	sol.clear();
 
+	simplify(phi);
 	dreal_file << phi->print_smt2(polarity);
 	dreal_file.close();
 
@@ -136,13 +137,16 @@ void converter::simplify(ast* a) {
 			a -> clear_children();
 		}
 	}
-	
 	else if (a->get_head_name() == "*") {
-		if (a->get_child(0)->get_name() == "0"
-			|| a->get_child(0)->get_name() == "0.0"
-			|| a->get_child(1)->get_name() == "0"
-			|| a->get_child(1)->get_name() == "0.0"){
-			a->set_head_symbol(num_sym("0"));
+		if ( (a->get_child_type(0) == constant 
+				&& a->get_child(0)->get_value() == 0) ||
+			 (a->get_child_type(1) == constant 
+				&& a->get_child(1)->get_value() == 0) ) {
+//		 (a->get_child(0)->get_name() == "0"
+//			|| a->get_child(0)->get_name() == "0.0"
+//			|| a->get_child(1)->get_name() == "0"
+//			|| a->get_child(1)->get_name() == "0.0"){
+			a->set_head_symbol(num_sym(0));
 			a->clear_children();
 		}
 
@@ -209,8 +213,47 @@ void converter::simplify(ast* a) {
 			a -> set_head_symbol(num_sym(c));
 			a -> clear_children();
 		}
+	}
+	else if (a->get_head_name() == "=") {
+		if ( a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant ) {
+			if (a->get_child(0)->get_value() == a->get_child(1)->get_value())
+				a -> set_head_symbol(symbol_table->locate_symbol("true"));
+				a -> clear_children();
+		}
+	}
+	else if (a->get_head_name() == "<") {
+		if ( a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant ) {
+			if (a->get_child(0)->get_value() < a->get_child(1)->get_value())
+				a -> set_head_symbol(symbol_table->locate_symbol("true"));
+				a -> clear_children();
+		}
 	}	
-
+	else if (a->get_head_name() == ">") {
+		if ( a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant ) {
+			if (a->get_child(0)->get_value() > a->get_child(1)->get_value())
+				a -> set_head_symbol(symbol_table->locate_symbol("true"));
+				a -> clear_children();
+		}
+	}
+	else if (a->get_head_name() == "<=") {
+		if ( a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant ) {
+			if (a->get_child(0)->get_value() <= a->get_child(1)->get_value())
+				a -> set_head_symbol(symbol_table->locate_symbol("true"));
+				a -> clear_children();
+		}
+	}	
+	else if (a->get_head_name() == ">=") {
+		if ( a->get_child_type(0) == constant 
+				&& a->get_child_type(1) == constant ) {
+			if (a->get_child(0)->get_value() >= a->get_child(1)->get_value())
+				a -> set_head_symbol(symbol_table->locate_symbol("true"));
+				a -> clear_children();
+		}
+	}	
 	//return a;
 
 }

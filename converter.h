@@ -183,7 +183,8 @@ public:
 	} 
 
 	inline ast* top() {
-		return leq(num("0"),num("1"));		
+		ast* a = new ast(symbol_table->locate_symbol("true"));
+		return a;		
 	} 
 
 	inline ast* num(string s) {

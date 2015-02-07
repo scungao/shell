@@ -20,6 +20,10 @@ class power_grid : public converter {
 	vector< vector<ast*> > zph; //z hats
 	vector< vector<ast*> > zqh;
 	map<int,set<int>*>	neighbors; 
+
+	vector< vector<ast*> > ap;
+	vector< vector<ast*> > aq;
+
 	vector< vector<double> >	b;
 	vector< vector<double> >	g;
 	vector< vector<double> > sigma2; //p and q share sigma for now
@@ -56,6 +60,10 @@ public:
 
 	ast* mf();
 	ast* est();
+	ast* esth(); //estimator with z hat
+	ast* attack();
+	ast* monitor(double);
+	ast* unsafe(double);
 
 };
 

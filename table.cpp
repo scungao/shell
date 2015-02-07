@@ -21,6 +21,7 @@ table::table() {
 	add(new symbol(">=", relation, 2));
 	add(new symbol("<=", relation, 2));
 	add(new symbol("=", relation, 2));
+	add(new symbol("true", relation, 0));
 
 	add(new symbol("(", aux, 0));
 	add(new symbol(")", aux, 0));

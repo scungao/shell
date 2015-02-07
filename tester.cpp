@@ -11,15 +11,17 @@ void tester::powertest(){
 	//double b[5][5];
 	//double g[5][5];
 	power_grid	grid(symbol_table, 3);
-	grid.add_line(1,2);
+//	grid.add_line(1,2);
 	grid.add_line(0,1);
-	grid.add_line(0,2);
+	grid.add_line(1,2);
 
 //	ast* f1 = grid.est();
-	ast* f1 = land(grid.mf(),grid.est());
+	ast* f1 = land(grid.mf(),grid.attack());
+	f1 = land(f1, grid.monitor(0.5));
+	f1 = land(f1, grid.esth());
+	f1 = land(f1, grid.unsafe(5));
 
-	cout<<f1->print_smt2(true)<<endl;
-	
+	cout<<f1->print_smt2(true)<<endl;	
 	map<symbol*, symbol*>	sol;
 	get_dreal_solutions(f1,sol,true);
 //	cout<< grid.p(1) -> print_infix() <<endl ;
@@ -39,10 +41,12 @@ void tester::powertest2(){
 	grid.add_line(6,3);
 	grid.add_line(2,8);
 
-	ast* f1 = land(grid.mf(),grid.est());
+	ast* f1 = land(grid.mf(),grid.attack());
+	f1 = land(f1, grid.monitor(0.5));
+	f1 = land(f1, grid.esth());
+	f1 = land(f1, grid.unsafe(5));
 
-	cout<<f1->print_smt2(true)<<endl;
-	
+	cout<<f1->print_smt2(true)<<endl;	
 	map<symbol*, symbol*>	sol;
 	get_dreal_solutions(f1,sol,true);
 //	cout<< grid.p(1) -> print_infix() <<endl ;
@@ -474,5 +478,5 @@ void tester::testall() {
 	//simple();
 	//ipc();
 	powertest2();
-	powertest3();
+	//powertest3();
 } 
