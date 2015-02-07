@@ -191,39 +191,84 @@ ast* power_grid::q(int i, int j, vector<ast*>& v, vector<ast*>& t) {
 	return result;
 }
 
+ast* power_grid::mf() {
+	ast* result = top();
+	for (int i=0; i<size; i++) {//todo: change this to e bounds
+		ast* a1 = eq( zp[i][i], p(i,volts,phasors));  
+		ast* a2 = eq( zq[i][i], q(i,volts,phasors));  
+		result = land(result,land(a1, a2));
+		if (neighbors[i]!=NULL) {
+			for (set<int>::iterator it = neighbors[i]->begin();
+					it != neighbors[i]->end(); it++) {
+				int j = *it;
+				if (j > i) {
+					ast* a3 = eq(zp[i][j],p(i,j,volts,phasors));
+					ast* a4 = eq(zq[i][j],q(i,j,volts,phasors));	
+					result = land(result, land(a3, a4));				
+				} 
+			}
+		}
+	}
+	return result;
+}
+
 ast* power_grid::est() { 
-	ast* result = num("0");
+	ast* result = top();
 	ast* component = num("0");
 
 	for (int i=0; i<size; i++) {
-//		for (int j=0; j<neighbors[i]->size(); j++) {
+		for (int j=0; j<size ; j++) {
 			component = add(
 							component,
 							div(
 								mul(
-									sub(zp[i][i],p(i,vhat,thehat)),
-									partial(p(i,vhat,thehat),vhat[0])
+									sub(zp[j][j],p(j,vhat,thehat)),
+									partial(p(j,vhat,thehat),vhat[i])
 									), 
-								num(sigma2[i][0])
+								num(sigma2[j][j])
 								)
 							);
 			component = add(
 							component,
 							div(
-								mul(sub(zp[i][i],p(i,vhat,thehat)),
-									partial(p(i,vhat,thehat),thehat[0])
+								mul(sub(zq[j][j],q(j,vhat,thehat)),
+									partial(q(i,vhat,thehat),thehat[i])
 									), 
-								num(sigma2[i][0])
+								num(sigma2[j][j])
 								)
 							);
-//		}
-		//for(int j = 0; j<neighbors[i]->size(); j++) {
-		//	break;
-		//}
+			if (neighbors[j]!=NULL) {
+				for (set<int>::iterator it=neighbors[j]->begin();
+									it != neighbors[j]->end(); it++) {
+					int k = *it;
+					if (k>j) {
+						component = add(
+										component,
+										div(
+											mul(
+												sub(zp[j][k],p(j,k,vhat,thehat)),
+												partial(p(j,k,vhat,thehat),vhat[i])
+											), 
+											num(sigma2[j][k])
+										)
+									);
+						component = add(
+										component,
+										div(
+											mul(sub(zq[j][k],q(j,k,vhat,thehat)),
+											partial(q(j,k,vhat,thehat),thehat[i])
+											), 
+											num(sigma2[j][k])
+										)
+									);
+					}
+				}
+			}
+		}
+		result = land(result, eq(component, num("0")));
+		component = num("0");
 	}
-	result = eq(component, num("0"));
 	simplify(result);
-
 	return result;
 }
 

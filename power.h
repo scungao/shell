@@ -54,6 +54,7 @@ public:
 	ast* p(int i, int j, vector<ast*>&, vector<ast*>&); //power flow P
 	ast* q(int i, int j, vector<ast*>&, vector<ast*>&); //power flow Q
 
+	ast* mf();
 	ast* est();
 
 };

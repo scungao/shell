@@ -182,6 +182,10 @@ public:
 		return result;
 	} 
 
+	inline ast* top() {
+		return leq(num("0"),num("1"));		
+	} 
+
 	inline ast* num(string s) {
 		symbol* new_num = symbol_table->locate_symbol(s);
 		if (new_num == NULL){ 

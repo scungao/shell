@@ -60,7 +60,7 @@ int main () {
 	dreal_file << phi->print_smt2(polarity);
 	dreal_file.close();
 
-	system("time ./dReal --proof --precision 0.01 dreal_file.smt2");
+	system("time ./dReal --proof --precision 1 dreal_file.smt2");
 
 	ifstream	dreal_result;
 	dreal_result.open("dreal_file.smt2.proof");
