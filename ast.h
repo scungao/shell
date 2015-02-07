@@ -97,7 +97,16 @@ public:
 	string print_prefix();
 	string print_infix();
 	string print_smt2(bool);//bool sets the formula or its negation
-
+	int count(string s) {
+		int r = 0;
+		if (get_head_name().compare(s) == 0) {
+			r++;
+		}
+		for (int i=0; i<children.size(); i++) {
+			r += children[i]->count(s);
+		}
+		return r;
+	}
 
 };
 

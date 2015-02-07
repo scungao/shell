@@ -82,22 +82,22 @@ power_grid::power_grid(table* t, int n)
 			aqn += to_string(j);
 
 			ast* zpv = var(zpn);
-			zpv -> set_bounds(-0.5,0.5);
+			zpv -> set_bounds(-1,1);
 
 			ast* zqv = var(zqn);
-			zqv -> set_bounds(-0.5,0.5);
+			zqv -> set_bounds(-1,1);
 	
 			ast* zphv = var(zphn);
-			zphv -> set_bounds(-0.5,0.5);
+			zphv -> set_bounds(-1,1);
 	
 			ast* zqhv = var(zqhn);
-			zqhv -> set_bounds(-0.5,0.5);
+			zqhv -> set_bounds(-1,1);
 
 			ast* apv = var(apn);
-			apv -> set_bounds(-10,10);
+			apv -> set_bounds(-5,5);
 
 			ast* aqv = var(aqn);
-			aqv -> set_bounds(-10,10);
+			aqv -> set_bounds(-5,5);
 
 	
 			zp[i].push_back(zpv);

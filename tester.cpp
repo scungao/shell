@@ -32,7 +32,7 @@ void tester::powertest(){
 void tester::powertest2(){
 	//double b[5][5];
 	//double g[5][5];
-	power_grid	grid(symbol_table, 10);
+	power_grid	grid(symbol_table, 20);
 	grid.add_line(1,2);
 	grid.add_line(0,1);
 	grid.add_line(0,2);
