@@ -17,6 +17,7 @@ public:
 	void cubli();
 	void powertest();
 	void powertest2();
+	void powertest3();
 };
 
 #endif
