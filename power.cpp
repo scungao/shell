@@ -1,5 +1,6 @@
 #include "power.h"
 #include <assert.h>
+#include <random>
 
 power_grid::power_grid(table* t, int n) 
 	: converter(t), size(n) {
@@ -48,8 +49,8 @@ power_grid::power_grid(table* t, int n)
 		xhat.push_back(a3);
 		xhat.push_back(a4);
 
-		b[i].resize(size,0.2);
-		g[i].resize(size,0.3);
+		b[i].resize(size,0.0);
+		g[i].resize(size,0.0);
 		sigma2[i].resize(size,0.00001);
 
 		for (int j =0; j<size; j++) {
@@ -133,6 +134,58 @@ void power_grid::add_line(int i, int j) {
 		neighbors.insert(pair<int,set<int>*>(j,nb));
 	}
 }
+
+void power_grid::random_config(int degree) {
+
+	cluster_list.resize(degree+1);
+
+	assert(degree>3);
+	for (int i=0; i<size ; i++) {
+    	std::random_device rd;
+    	std::mt19937 gen(rd());
+    	std::uniform_int_distribution<> dis(2, degree-1);
+    	std::uniform_real_distribution<> dis2(0, 1);
+
+		int d = dis(gen);
+		sigma2[i][i] = dis2(gen) * 0.001;
+
+		if (neighbors[i]==NULL)
+			neighbors[i] = new set<int>;
+
+		int actd = 0; //actual degree
+		for (int j=0; j<d ; j++) {
+	    	std::uniform_int_distribution<> dis3(0, size-1);
+			int n = dis3(gen);
+
+//			cout<<"for bus "<<i<<" picked "<<n<<endl;
+
+			if (n!=i) {
+				if (neighbors[n] != NULL) {
+					if (neighbors[n]->size() >= degree) 
+						continue;
+				}
+				else {
+					neighbors[n] = new set<int>;
+				}
+				actd++;
+				neighbors[i]->insert(n);
+				neighbors[n]->insert(i);
+
+				b[i][n] = dis2(gen) * 0.2;
+				b[n][i] = b[i][n];
+
+				g[i][n] = dis2(gen) * 0.2;
+				g[n][i] = g[i][n];
+
+				sigma2[i][n] = dis2(gen) * 0.001;
+				sigma2[n][i] = sigma2[i][n];
+			} 
+		}
+
+		cluster_list[actd].push_back(i);
+	}
+}
+
 
 ast* power_grid::p(int i, vector<ast*>& v, vector<ast*>& t) {
 	ast* result;
@@ -417,5 +470,38 @@ ast* power_grid::esth() {
 	return result;
 }
 
+
+void power_grid::dump() {	
+	for (int i=0; i<size ; i++) {
+		if (neighbors[i]!=NULL) {
+			cout<<"Bus "<<i<<" is connected to: ";
+			for (set<int>::iterator it=neighbors[i]->begin(); 
+					it != neighbors[i]->end() ; it++ ) {
+				cout<<"Bus "<<*it<<" ";
+			}
+			cout<<".";
+		}
+		else
+			cout<<"Bus "<<i<<" is isolated.";
+
+		cout<<endl;
+
+		for (int j=0; j<size; j++) {
+			cout <<"b"<<i<<j<<":"<<b[i][j]<<" ";
+		}
+		cout<<endl;
+
+		for (int j=0; j<size; j++) {
+			cout <<"g"<<i<<j<<":"<<g[i][j]<<" ";		
+		}
+		cout<<endl;
+
+		for (int j=0; j<size; j++) {
+			cout <<"sigma2"<<i<<j<<":"<<sigma2[i][j]<<" ";		
+		}
+		cout<<endl;
+
+	}
+}
 
 

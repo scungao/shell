@@ -27,11 +27,14 @@ class power_grid : public converter {
 	vector< vector<double> >	b;
 	vector< vector<double> >	g;
 	vector< vector<double> > sigma2; //p and q share sigma for now
+	
+	vector< vector<int> >	cluster_list;
 	//vector<vector<int>> b;
 	//vector<vector<int>> g;
 
 public:
 	power_grid(table*, int);
+	void random_config(int);
 	inline ~power_grid() {}
 	inline int get_size() { return size; }
 	void add_line(int i, int j);
@@ -64,6 +67,8 @@ public:
 	ast* attack();
 	ast* monitor(double);
 	ast* unsafe(double);
+
+	void dump();
 
 };
 

@@ -46,6 +46,7 @@ public:
 	ast*	process_to_formula(ast*);
 	ast*	dup(ast*);	
 	bool	get_dreal_solutions(ast*, map<symbol*, symbol*>&, bool);
+	bool	get_dreal_solutions(ast*, map<symbol*, symbol*>&, bool, double, string, int);
 	void	simplify(ast*);//compress constants
 
 	ast*	partial(ast*, symbol*);
@@ -55,7 +56,7 @@ public:
 
 	ast*	lyapunov(vector<ast*>&, vector<ast*>&, ast*);
 	bool	cegis(ast*, vector<ast*>&, vector<ast*>&, map<symbol*, symbol*>&, double);
-
+	
 	inline ast*	add(ast* a1, ast* a2) { 
 		ast* result = new ast(symbol_table->locate_symbol("+")); 
 		result -> add_child(a1);

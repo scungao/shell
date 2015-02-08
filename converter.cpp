@@ -61,10 +61,106 @@ int main () {
 	dreal_file << phi->print_smt2(polarity);
 	dreal_file.close();
 
-	system("time ./dReal --proof --precision 1 dreal_file.smt2");
+	system("time ./dReal --proof --precision 0.5 dreal_file.smt2");
 
 	ifstream	dreal_result;
 	dreal_result.open("dreal_file.smt2.proof");
+
+	char cc;
+	string cline;
+	string	buffer;
+	vector<string>	fields;
+
+	getline(dreal_result, cline);
+
+	if (cline.find("SAT") == 0) {
+//		printf("sat answer is returned\n");
+		while (dreal_result.get(cc)) { //collect the fields
+			if ((isalnum(cc)||ispunct(cc))
+			 		&& cc!=',' && cc!= ':' && cc!='[' && cc!= ']')
+				buffer += cc;
+			else {
+				if (!buffer.empty())
+					fields.push_back(buffer);
+				buffer.clear();
+			}
+		}
+		//for (int i=0; i<fields.size(); i++) cout<<fields[i]<<endl;
+
+		for(int i=0; i<fields.size(); i=i+4) {
+
+			//avoid underflow
+			if (fields[i+1][(fields[i+1]).size()-5]=='e'&& 
+					fields[i+1][(fields[i+1]).size()-4]=='-')
+				fields[i+1] = "0";
+
+			if (fields[i+2][(fields[i+2]).size()-5]=='e'&& 
+					fields[i+2][(fields[i+2]).size()-4]=='-')
+//			if (fields[i+2].find("e-308")!= std::string::npos)
+				fields[i+2] = "0";
+
+			double a = stod(fields[i+1]);
+			double b = stod(fields[i+2]);
+			symbol* name = symbol_table->locate_symbol(fields[i]);
+			symbol* value = num_sym(to_string(0.5*(a+b)));
+			sol.insert(pair<symbol*, symbol*>(name,value));
+			//	cout<<fields[i]<<"["<<fields[i+1]<<","<<fields[i+2]<<"]"<<endl;
+		}
+
+		for(map<symbol*,symbol*>::iterator it=sol.begin(); it!=sol.end(); it++) {
+			cout<< it->first->get_name()<<" : "<<it->second->get_name()<<endl;
+		}	
+
+		dreal_result.close();
+		return true;
+	}
+
+	dreal_result.close();
+	return false;
+}
+
+bool converter::get_dreal_solutions(ast* phi, map<symbol*, symbol*>& sol, bool polarity, double precision, string label, int index) {
+/*
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+int main () {
+  ofstream myfile;
+  myfile.open ("example.txt");
+  myfile << "Writing this to a file.\n";
+  myfile.close();
+  return 0;
+}
+*/
+	stringstream s;
+	ofstream	dreal_file;
+
+	string fname = "dreal_file_";
+	fname += label;
+	fname += "_";
+	fname += to_string(index);
+	fname += ".smt2";
+
+	dreal_file.open(fname);
+
+	sol.clear();
+
+	simplify(phi);
+	dreal_file << phi->print_smt2(polarity);
+	dreal_file.close();
+
+	string cmd = "time ./dReal --proof --precision ";
+	cmd += to_string(precision);
+	cmd += " ";
+	cmd += fname;
+
+	system(cmd.c_str());
+
+	ifstream	dreal_result;
+	fname += ".proof";
+
+	dreal_result.open(fname);
 
 	char cc;
 	string cline;

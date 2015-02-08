@@ -10,10 +10,13 @@ tester::tester(table* st):
 void tester::powertest(){
 	//double b[5][5];
 	//double g[5][5];
-	power_grid	grid(symbol_table, 3);
+	int size = 10;
+	power_grid	grid(symbol_table, size);
+	grid.random_config(4);
+	grid.dump();
 //	grid.add_line(1,2);
-	grid.add_line(0,1);
-	grid.add_line(1,2);
+//	grid.add_line(0,1);
+//	grid.add_line(1,2);
 
 //	ast* f1 = grid.est();
 	ast* f1 = land(grid.mf(),grid.attack());
@@ -21,9 +24,9 @@ void tester::powertest(){
 	f1 = land(f1, grid.esth());
 	f1 = land(f1, grid.unsafe(5));
 
-	cout<<f1->print_smt2(true)<<endl;	
+//	cout<<f1->print_smt2(true)<<endl;	
 	map<symbol*, symbol*>	sol;
-	get_dreal_solutions(f1,sol,true);
+//	get_dreal_solutions(f1,sol,true);
 //	cout<< grid.p(1) -> print_infix() <<endl ;
 //	cout<< grid.q(1) -> print_infix() <<endl ;
 }
@@ -477,6 +480,6 @@ void tester::testall() {
 	//pwf();
 	//simple();
 	//ipc();
-	powertest2();
+	powertest();
 	//powertest3();
 } 
