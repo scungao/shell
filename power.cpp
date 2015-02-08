@@ -286,6 +286,28 @@ ast* power_grid::mf() {
 	return result;
 }
 
+ast* power_grid::mf(int i, int j, bool poq) {
+	ast* result;
+	if (i==j) {//bus
+		if (poq) {//p
+			result = eq( zp[i][i], p(i,volts,phasors));  
+		}
+		else {//q
+			result = eq( zq[i][i], q(i,volts,phasors));  
+		}
+	}
+	else {//line
+		if (poq) {
+			result = eq(zp[i][j],p(i,j,volts,phasors));
+		}
+		else {
+			result = eq(zq[i][j],q(i,j,volts,phasors));	
+		}
+	}
+	simplify(result);
+	return result;
+}
+
 ast* power_grid::attack() {
 	ast* result = top();
 	for (int i=0; i<size; i++) {
@@ -308,6 +330,28 @@ ast* power_grid::attack() {
 	return result;
 }
 
+
+ast* power_grid::attack(int i, int j, bool poq) {
+	ast* result;
+	if (i==j) {//bus
+		if (poq) {//p
+			result = eq( zph[i][i], add(zp[i][i], ap[i][i]));
+		}
+		else {//q
+			result = eq( zqh[i][i], add(zq[i][i], aq[i][i]));
+		}
+	}
+	else {//line
+		if (poq) {
+			result = eq(zph[i][j],add(zp[i][j], ap[i][j]));
+		}
+		else {
+			result = eq(zqh[i][j],add(zq[i][j], aq[i][j]));	
+		}
+	}
+	simplify(result);
+	return result;
+}
 
 ast* power_grid::monitor(double tau) {
 	ast* result = top();
@@ -335,6 +379,32 @@ ast* power_grid::monitor(double tau) {
 	return result;
 }
 
+ast* power_grid::monitor(double tau, int i, int j, bool poq) {
+	ast* result;
+	if (i==j) {//bus
+		if (poq) {//p
+			ast* a1 = sub(zph[i][i], p(i,vhat,thehat));  
+			result = land(lt(a1,num(tau)), gt(a1, sub(num(0),num(tau))));
+		}
+		else {//q
+			ast* a2 = sub( zqh[i][i], q(i,vhat,thehat));  
+			result = land(lt(a2,num(tau)), gt(a2, sub(num(0),num(tau))));
+		}
+	}
+	else {//line
+		if (poq) {
+			ast* a3 = sub(zph[i][j],p(i,j,vhat,thehat));
+			result = land(lt(a3,num(tau)), gt(a3, sub(num(0),num(tau))));
+		}
+		else {
+			ast* a4 = sub(zqh[i][j],q(i,j,vhat,thehat));	
+			result = land(lt(a4,num(tau)), gt(a4, sub(num(0),num(tau))));
+		}
+	}
+	simplify(result);
+	return result;
+}
+
 ast* power_grid::unsafe(double eps) {
 	ast* result = num(0);
 	for (int i=0; i<size; i++) {
@@ -347,6 +417,9 @@ ast* power_grid::unsafe(double eps) {
 	simplify(result);
 	return result;
 }
+
+
+
 
 
 ast* power_grid::est() { 
@@ -469,6 +542,12 @@ ast* power_grid::esth() {
 	simplify(result);
 	return result;
 }
+
+
+//ast* fdi(int i, int j, bool poq) {//true is p, false is q
+
+//}
+
 
 
 void power_grid::dump() {	

@@ -27,7 +27,7 @@ class power_grid : public converter {
 	vector< vector<double> >	b;
 	vector< vector<double> >	g;
 	vector< vector<double> > sigma2; //p and q share sigma for now
-	
+
 	vector< vector<int> >	cluster_list;
 	//vector<vector<int>> b;
 	//vector<vector<int>> g;
@@ -62,10 +62,13 @@ public:
 	ast* q(int i, int j, vector<ast*>&, vector<ast*>&); //power flow Q
 
 	ast* mf();
+	ast* mf(int, int, bool);
 	ast* est();
 	ast* esth(); //estimator with z hat
 	ast* attack();
+	ast* attack(int, int, bool);
 	ast* monitor(double);
+	ast* monitor(double, int, int, bool);
 	ast* unsafe(double);
 
 	void dump();
