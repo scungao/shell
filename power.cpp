@@ -143,7 +143,7 @@ void power_grid::random_config(int degree) {
 	for (int i=0; i<size ; i++) {
     	std::random_device rd;
     	std::mt19937 gen(rd());
-    	std::uniform_int_distribution<> dis(1, degree-1);
+    	std::uniform_int_distribution<> dis(1, degree);
     	std::uniform_real_distribution<> dis2(0, 1);
 
 		int d = dis(gen);

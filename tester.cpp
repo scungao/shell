@@ -3,6 +3,8 @@
 #include "tester.h"
 #include "power.h"
 #include <chrono>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h> 
 
 
 using namespace std;
@@ -75,7 +77,8 @@ void tester::powertest2(){
 	vector<int>	test_degree;
 	vector<int> test_nattacks;
 	vector<bool>	test_result;
-
+	vector<int>	nvar;
+	vector<int> nnonlinear;
 	//vector< vector<double> > stats;
 	//vector< string > stats_name;
 
@@ -98,10 +101,12 @@ void tester::powertest2(){
 	ast* f;
 //collect data
 for (int i1=0; i1<20; i1++) {
-	for (int j=2; j<5; j++) {
+	for (int j=1; j<5; j++) {
 		size = 10+i1*5;
 		degree = j;
-		nattack = 1;
+
+		srand(time(NULL));
+		nattack = rand()%5;
 
 		power_grid	grid(symbol_table, size);
 		test_degree.push_back(degree);
@@ -113,16 +118,18 @@ for (int i1=0; i1<20; i1++) {
  		f = grid.fdi(0,0,tau,eps);
 
 		for (int ki = 1; ki< nattack; ki++){
-			f = land(f,grid.fdi(0,0,tau,eps));
+			f = lor(f,grid.fdi(0,0,tau,eps));
 		}
 //	cout<<f1->print_smt2(true)<<endl;
 
 		map<symbol*, symbol*> sol;
 //	get_dreal_solutions(f1,sol,true);
 
-  		start = std::chrono::system_clock::now();
+		nnonlinear.push_back(f->count("sin")+f->count("cos")+f->count("*")+f->count("/"));
 
     	label += to_string(degree);
+		
+  		start = std::chrono::system_clock::now();
 		test_result.push_back(get_dreal_solutions(f, sol, true, precision, label, size));
 	
 		end = std::chrono::system_clock::now();
@@ -132,8 +139,6 @@ for (int i1=0; i1<20; i1++) {
     	test_time.push_back(elapsed_seconds.count());
 
 	}
-
-}
 
     label2 = to_string(precision);
     stats_name += label2;
@@ -161,9 +166,10 @@ for (int i1=0; i1<20; i1++) {
     	stats_file<<test_nattacks[i]<<" ";
     stats_file<<"]"<<endl;
 
-
-
     stats_file.close();
+}
+
+
 
 }
 
