@@ -17,9 +17,9 @@ power_grid::power_grid(table* t, int n)
 
 	for (int i = 0; i<size; i++) {
 		string v = "v";
-		string theta = "theta";
+		string theta = "th";
 		string v_hat = "vhat";
-		string t_hat = "thehat";
+		string t_hat = "thhat";
 
 		v += to_string(i);
 		theta += to_string(i);
@@ -28,13 +28,13 @@ power_grid::power_grid(table* t, int n)
 	//	cout<<v<<" "<<theta;
 	
 		ast* a1 = var(v);
-		a1->set_bounds(-2,2);
+		a1->set_bounds(0,2);
 
 		ast* a2 = var(theta);
 		a2 -> set_bounds(-4,4);
 
 		ast* a3 = var(v_hat);
-		a3 -> set_bounds(-2,2);
+		a3 -> set_bounds(0,2);
 
 		ast* a4 = var(t_hat);
 		a4 -> set_bounds(-4,4);
@@ -83,16 +83,16 @@ power_grid::power_grid(table* t, int n)
 			aqn += to_string(j);
 
 			ast* zpv = var(zpn);
-			zpv -> set_bounds(-1,1);
+			zpv -> set_bounds(-3,3);
 
 			ast* zqv = var(zqn);
-			zqv -> set_bounds(-1,1);
+			zqv -> set_bounds(-3,3);
 	
 			ast* zphv = var(zphn);
-			zphv -> set_bounds(-1,1);
+			zphv -> set_bounds(-3,3);
 	
 			ast* zqhv = var(zqhn);
-			zqhv -> set_bounds(-1,1);
+			zqhv -> set_bounds(-3,3);
 
 			ast* apv = var(apn);
 			apv -> set_bounds(-5,5);
@@ -139,11 +139,11 @@ void power_grid::random_config(int degree) {
 
 	cluster_list.resize(degree+1);
 
-	assert(degree>3);
+	//assert(degree>3);
 	for (int i=0; i<size ; i++) {
     	std::random_device rd;
     	std::mt19937 gen(rd());
-    	std::uniform_int_distribution<> dis(2, degree-1);
+    	std::uniform_int_distribution<> dis(1, degree-1);
     	std::uniform_real_distribution<> dis2(0, 1);
 
 		int d = dis(gen);
@@ -181,7 +181,6 @@ void power_grid::random_config(int degree) {
 				sigma2[n][i] = sigma2[i][n];
 			} 
 		}
-
 		cluster_list[actd].push_back(i);
 	}
 }
@@ -418,8 +417,28 @@ ast* power_grid::unsafe(double eps) {
 	return result;
 }
 
+ast* power_grid::unsafe(double eps, int i, int j) {
+	ast* result = num(0);
+	if (i==j){
+		ast* a1 = sub(volts[i], vhat[i]);
+		ast* a2 = sub(phasors[i], vhat[i]);
+		result = add(pow(a1,num(2)),pow(a2,num(2)));
+	}
+	else {
+		ast* b1 = sub(volts[i], vhat[i]);
+		ast* b2 = sub(volts[j],vhat[j]);
 
+		ast* b3 = sub(phasors[i], thehat[i]);
+		ast* b4 = sub(phasors[j], vhat[j]);
 
+		ast* b5 = add(add(pow(b1,num(2)),pow(b2,num(2))),
+					  add(pow(b3,num(2)),pow(b4,num(2))));
+		result = b5;
+	}
+	result = geq(result,num(eps));
+	simplify(result);
+	return result;
+}
 
 
 ast* power_grid::est() { 
@@ -548,6 +567,164 @@ ast* power_grid::esth() {
 
 //}
 
+
+ast* power_grid::esth(int i, int j) { 
+	ast* result = top();
+	ast* sum_p = num(0);
+	ast* sum_q = num(0);
+	ast* component = num(0);
+
+	if (i!=j) {//bus
+		sum_p = add(
+						div(
+							mul(
+								sub(zph[i][j],p(i,j,vhat,thehat)),
+								partial(p(i,j,vhat,thehat),vhat[i])
+								), 
+							num(sigma2[j][j])
+							),
+						div(
+							mul(
+								sub(zph[i][j],p(i,j,vhat,thehat)),
+								partial(p(i,j,vhat,thehat),vhat[j])
+								), 
+							num(sigma2[j][j])
+							)
+					);
+
+		sum_p = add(sum_p, add(
+						div(
+							mul(
+								sub(zph[i][j],p(i,j,vhat,thehat)),
+								partial(p(i,j,vhat,thehat),thehat[i])
+								), 
+							num(sigma2[j][j])
+							),
+						div(
+							mul(
+								sub(zph[i][j],p(i,j,vhat,thehat)),
+								partial(p(i,j,vhat,thehat),thehat[j])
+								), 
+							num(sigma2[j][j])
+							)
+						)
+				);
+		sum_q = add(
+						div(
+							mul(
+								sub(zqh[i][j],q(i,j,vhat,thehat)),
+								partial(q(i,j,vhat,thehat),vhat[i])
+								), 
+							num(sigma2[j][j])
+							),
+						div(
+							mul(
+								sub(zqh[i][j],q(i,j,vhat,thehat)),
+								partial(q(i,j,vhat,thehat),vhat[j])
+								), 
+							num(sigma2[j][j])
+							)
+					);
+
+		sum_p = add(sum_p, add(
+						div(
+							mul(
+								sub(zqh[i][j],q(i,j,vhat,thehat)),
+								partial(q(i,j,vhat,thehat),thehat[i])
+								), 
+							num(sigma2[j][j])
+							),
+						div(
+							mul(
+								sub(zqh[i][j],q(i,j,vhat,thehat)),
+								partial(q(i,j,vhat,thehat),thehat[j])
+								), 
+							num(sigma2[j][j])
+							)
+						)
+				);
+		result = land(eq(sum_p,num(0)), eq(sum_q,num(0)));
+	}
+	else {
+		if (neighbors[i]!=NULL) {
+			sum_p = div(
+						mul(
+							sub(zph[i][i],p(i,vhat,thehat)),
+							partial(p(i,vhat,thehat),vhat[i])
+							), 
+						num(sigma2[i][i])
+						);
+			sum_q = div(
+						mul(
+							sub(zqh[i][i],q(i,vhat,thehat)),
+							partial(q(i,vhat,thehat),vhat[i])
+							), 
+						num(sigma2[i][i])
+						);
+			for (set<int>::iterator it=neighbors[j]->begin();
+									it != neighbors[j]->end(); it++) {
+					int k = *it;
+					sum_p = add(
+								sum_p,
+								div(
+									mul(
+										sub(zph[i][i],p(i,vhat,thehat)),
+										partial(p(i,vhat,thehat),vhat[k])
+										), 
+									num(sigma2[j][k])
+									)
+								);
+					sum_p = add(
+								sum_p,
+								div(
+									mul(
+										sub(zph[j][k],p(j,k,vhat,thehat)),
+										partial(p(j,k,vhat,thehat),thehat[i])
+										), 
+									num(sigma2[j][k])
+									)
+								);
+					sum_q = add(
+								sum_q,
+								div(
+									mul(
+										sub(zqh[i][i],q(i,vhat,thehat)),
+										partial(q(i,vhat,thehat),vhat[k])
+										), 
+									num(sigma2[j][k])
+									)
+								);
+					sum_p = add(
+								sum_p,
+								div(
+									mul(
+										sub(zqh[j][k],q(j,k,vhat,thehat)),
+										partial(q(j,k,vhat,thehat),thehat[i])
+										), 
+									num(sigma2[j][k])
+									)
+								);
+			}
+			result = land(eq(sum_p,num(0)),eq(sum_q,num(0)));
+		}
+	}
+	simplify(result);
+	return result;
+}
+
+ast* power_grid::fdi(int i, int j, double tau, double eps) {
+	ast* result;
+	
+	ast* f1 = land(mf(i,j,true),mf(i,j,false));
+	ast* f2 = land(monitor(tau,i,j,true),monitor(tau,i,j,false));
+	ast* f3 = land(attack(i,j,true),attack(i,j,false));
+	ast* f4 = land(esth(i,j),unsafe(eps,i,j));
+
+//	result = land(land(f1, land(f2, f3)),f5);
+	result = land(f1, land(f2, land(f3, f4)));
+	simplify(result);
+	return result;
+}
 
 
 void power_grid::dump() {	

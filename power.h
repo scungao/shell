@@ -65,11 +65,14 @@ public:
 	ast* mf(int, int, bool);
 	ast* est();
 	ast* esth(); //estimator with z hat
+	ast* esth(int, int);
 	ast* attack();
 	ast* attack(int, int, bool);
 	ast* monitor(double);
 	ast* monitor(double, int, int, bool);
 	ast* unsafe(double);
+	ast* unsafe(double, int, int);
+	ast* fdi(int,int,double,double);
 
 	void dump();
 

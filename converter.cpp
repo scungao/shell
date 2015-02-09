@@ -203,9 +203,9 @@ int main () {
 			//	cout<<fields[i]<<"["<<fields[i+1]<<","<<fields[i+2]<<"]"<<endl;
 		}
 
-		for(map<symbol*,symbol*>::iterator it=sol.begin(); it!=sol.end(); it++) {
-			cout<< it->first->get_name()<<" : "<<it->second->get_name()<<endl;
-		}	
+//		for(map<symbol*,symbol*>::iterator it=sol.begin(); it!=sol.end(); it++) {
+//			cout<< it->first->get_name()<<" : "<<it->second->get_name()<<endl;
+//		}	
 
 		dreal_result.close();
 		return true;

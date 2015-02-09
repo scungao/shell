@@ -1,6 +1,9 @@
 #include <iostream>
+#include <fstream>
 #include "tester.h"
 #include "power.h"
+#include <chrono>
+
 
 using namespace std;
 
@@ -8,30 +11,164 @@ tester::tester(table* st):
 	symbol_table(st), converter(st) {}
 
 void tester::powertest(){
-	//double b[5][5];
-	//double g[5][5];
+
+	vector<int> test_size;
+	vector<double> test_time;
+	vector<int>	test_degree;
+	vector<int> test_nattacks;
+	vector< map<symbol*, symbol*> > sols;
+
+//collect data
+	for (int i=0; i<30; i++) {
+		int size = 10 + 5*i;
+		for (int j=1; j<5; j++) {
+			for (int k=1; k<5; k++) {
+
+			power_grid	grid(symbol_table, size);
+
+			test_degree.push_back(j);
+			test_size.push_back(size);
+			test_nattacks.push_back(k);
+
+			grid.random_config(j);
+
+			map<symbol*, symbol*> sol;
+
+//			get_dreal_solutions(f1,sol,true);
+			sols.push_back(sol);	//todo: save solutions somewhere
+			//test_time.push_back(time);
+			}
+		}
+	}
+}
+//generate julia code from the statistics that can run
+
+
+
+/*
 	int size = 10;
 	power_grid	grid(symbol_table, size);
 	grid.random_config(4);
 	grid.dump();
-//	grid.add_line(1,2);
-//	grid.add_line(0,1);
-//	grid.add_line(1,2);
 
-//	ast* f1 = grid.est();
 	ast* f1 = land(grid.mf(),grid.attack());
 	f1 = land(f1, grid.monitor(0.5));
 	f1 = land(f1, grid.esth());
 	f1 = land(f1, grid.unsafe(5));
 
-//	cout<<f1->print_smt2(true)<<endl;	
 	map<symbol*, symbol*>	sol;
 //	get_dreal_solutions(f1,sol,true);
 //	cout<< grid.p(1) -> print_infix() <<endl ;
 //	cout<< grid.q(1) -> print_infix() <<endl ;
+
+
+
+//generate julia code from the statistics that can run
+
+
+*/
+
+void tester::powertest2(){
+
+	vector<int> test_size;
+	vector<double> test_time;
+	vector<int>	test_degree;
+	vector<int> test_nattacks;
+	vector<bool>	test_result;
+
+	//vector< vector<double> > stats;
+	//vector< string > stats_name;
+
+	vector< map<symbol*, symbol*> > sols;
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+	ofstream	stats_file;
+	string stats_name = "stats_";
+	string label = "";
+	string label2 = "prec";
+
+	double precision = 1;
+	int index=0;
+	double tau = 0.5;
+	double eps = 10;
+
+	int size;
+	int degree;
+	int nattack;
+
+	ast* f;
+//collect data
+for (int i1=0; i1<20; i1++) {
+	for (int j=2; j<5; j++) {
+		size = 10+i1*5;
+		degree = j;
+		nattack = 1;
+
+		power_grid	grid(symbol_table, size);
+		test_degree.push_back(degree);
+		test_size.push_back(size);
+		test_nattacks.push_back(nattack);
+
+		grid.random_config(degree);
+//	grid.dump();
+ 		f = grid.fdi(0,0,tau,eps);
+
+		for (int ki = 1; ki< nattack; ki++){
+			f = land(f,grid.fdi(0,0,tau,eps));
+		}
+//	cout<<f1->print_smt2(true)<<endl;
+
+		map<symbol*, symbol*> sol;
+//	get_dreal_solutions(f1,sol,true);
+
+  		start = std::chrono::system_clock::now();
+
+    	label += to_string(degree);
+		test_result.push_back(get_dreal_solutions(f, sol, true, precision, label, size));
+	
+		end = std::chrono::system_clock::now();
+
+    	std::chrono::duration<double> elapsed_seconds = end-start;
+
+    	test_time.push_back(elapsed_seconds.count());
+
+	}
+
+}
+
+    label2 = to_string(precision);
+    stats_name += label2;
+    stats_file.open(stats_name);
+
+
+    stats_file<<"size = [";
+    for (int i=0; i<test_size.size(); i++)
+    	stats_file<<test_size[i]<<" ";
+    stats_file<<"]"<<endl;
+
+
+    stats_file<<"time = [";
+    for (int i=0; i<test_time.size(); i++)
+    	stats_file<<test_time[i]<<" ";
+    stats_file<<"]"<<endl;
+
+    stats_file<<"degree = [";
+    for (int i=0; i<test_degree.size(); i++)
+    	stats_file<<test_degree[i]<<" ";
+    stats_file<<"]"<<endl;
+
+    stats_file<<"nattacks = [";
+    for (int i=0; i<test_nattacks.size(); i++)
+    	stats_file<<test_nattacks[i]<<" ";
+    stats_file<<"]"<<endl;
+
+
+
+    stats_file.close();
+
 }
 
 
+/*
 void tester::powertest2(){
 	//double b[5][5];
 	//double g[5][5];
@@ -55,7 +192,7 @@ void tester::powertest2(){
 //	cout<< grid.p(1) -> print_infix() <<endl ;
 //	cout<< grid.q(1) -> print_infix() <<endl ;
 }
-
+*/
 void tester::powertest3(){
 	//double b[5][5];
 	//double g[5][5];
@@ -480,6 +617,6 @@ void tester::testall() {
 	//pwf();
 	//simple();
 	//ipc();
-	powertest();
+	powertest2();
 	//powertest3();
 } 

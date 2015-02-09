@@ -107,7 +107,16 @@ public:
 		}
 		return r;
 	}
-
+	int count(s_type s) {
+		int r = 0;
+		if (get_head_symbol() -> get_stype() == s) {
+			r++;
+		}
+		for (int i=0; i<children.size(); i++) {
+			r += children[i]->count(s);
+		}
+		return r;
+	}
 };
 
 #endif
