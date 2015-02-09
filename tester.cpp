@@ -119,10 +119,7 @@ for (int i1=0; i1<20; i1++) {
 
  		int m = 0;
 		for (int ki = 1; ki< nattack; ki++){
-			srand(time(NULL));
-			m = rand()%size;	
-
-			f = lor(f,grid.fdi(m,size%7,tau,eps));
+			f = lor(f,grid.fdi(0,1,tau,eps));
 		}
 //	cout<<f1->print_smt2(true)<<endl;
 
@@ -136,7 +133,7 @@ for (int i1=0; i1<20; i1++) {
   		start = std::chrono::system_clock::now();
 		test_result.push_back(get_dreal_solutions(f, sol, true, precision, label, size));
 		label.clear();
-		
+
 		end = std::chrono::system_clock::now();
 
     	std::chrono::duration<double> elapsed_seconds = end-start;
