@@ -18,6 +18,7 @@ public:
 	void powertest();
 	void powertest2();
 	void powertest3();
+	void ufuk();
 };
 
 #endif

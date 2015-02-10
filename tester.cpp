@@ -465,6 +465,65 @@ void tester::simple() {
 
 }
 
+void tester::ufuk() {
+	vector<ast*> x;
+	vector<ast*> f;
+	vector<ast*> p;
+
+	x.push_back(var("x"));
+	x[0]->set_bounds(-9,10);
+
+	x.push_back(var("y"));
+	x[1]->set_bounds(-9,10);
+
+	x.push_back(var("z"));
+	x[2]->set_bounds(-9,10);
+
+	p.push_back(var("gamma"));
+	p[0]->set_bounds(-9,10);
+
+	p.push_back(var("a"));
+	p[1]->set_bounds(-9,10);
+
+	p.push_back(var("b"));
+	p[2]->set_bounds(-9,10);
+
+	p.push_back(var("c"));
+	p[3]->set_bounds(-9,10);
+
+//	cout<<"p size: "<<p.size();
+
+	ast* fx = sub(x[2],x[0]);
+//	ast* fx = x[0];
+	ast* fy = add( 
+					sub(mul(x[0],num(2)),
+						mul(x[1],num(2))),
+					x[2]
+	//				x[1]
+				);
+
+	ast* v = add(
+				add(mul(p[1],pow(x[0],num(2))),mul(p[3],mul(x[0],x[1]))),
+				mul(p[2],pow(x[0],num(2)))
+				);
+
+	ast* dv = add(mul(partial(v,x[0]),fx),mul(partial(v,x[1]),fy));
+
+	ast* rhs = sub(mul(p[0],pow(x[2],num(2))),
+				   pow(mul(num(0.4),add(x[0],x[1])),num(2)));
+
+	ast* final = land(geq(v,num(0)),leq(dv,rhs));
+
+	map<symbol*, symbol*> sol;
+
+	if (cegis(final, x, p, sol, 0.01)) {
+		cout<<"cegis finished"<<endl;
+	}
+	else
+		cout<<"cegies found no solution"<<endl;	
+}
+
+
 
 void tester::ipc() {
 	ast* m = num("1.0");
@@ -626,6 +685,7 @@ void tester::testall() {
 	//pwf();
 	//simple();
 	//ipc();
-	powertest2();
+	//powertest2();
 	//powertest3();
+	ufuk();
 } 
