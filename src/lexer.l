@@ -1,6 +1,6 @@
 %{
-#include "parser.tab.h"
 #include "src/ast.h"
+#include "parser.tab.h"
 #define YY_DECL extern "C" int yylex()
 
 %}
