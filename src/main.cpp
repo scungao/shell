@@ -4,24 +4,27 @@
 #include <cctype>
 #include "converter.h"
 #include "tester.h"
-#include "parser.h"
 
 using namespace std;
+
+extern "C" int yylex();
+extern "C" int yyparse();
+extern "C" FILE *yyin;
 
 inline void reply(string s) { cout<<"\033[36m"<<s<<"."<<"\033[0m"<<"\n"; }
 
 int main() {
 	table	full_table;
-	converter global_converter(&full_table);
-	parser 	main_parser(&full_table);
+	converter woods(&full_table);
 	tester	test_suite(&full_table);
 
-	char current_char;
-	string command;
-	string subcommand;
+	yyparse();
 
-	test_suite.testall();
 	return 0;
+}
+/*
+//	test_suite.testall();
+//	return 0;
 
 //needs nothing below for now
 	cout<<"\033[36m"<<"cda$ "<<"\033[0m";
@@ -54,15 +57,15 @@ int main() {
 			continue;
 		}
 		else if ( command.compare("variable") == 0 ) {
-			reply(main_parser.collect_variable(cin, current_char));
+			//reply(main_parser.collect_variable(cin, current_char));
 			continue; //avoids getchar at the bottom of the loop
 		}
 		else if ( command.compare("constant") == 0 ) {
-			reply(main_parser.collect_constant(cin, current_char));
+			//reply(main_parser.collect_constant(cin, current_char));
 			continue;
 		}
 		else if ( command.compare("process") == 0 ) {
-			reply(main_parser.collect_process(cin, current_char));
+			//reply(main_parser.collect_process(cin, current_char));
 			continue;
 		}
 		else if ( command.compare("formula") == 0 ) {
@@ -86,5 +89,5 @@ int main() {
 	reply("Normal exit");
 	return 0;
 }
-
+*/
 

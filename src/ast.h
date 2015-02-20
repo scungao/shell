@@ -71,6 +71,7 @@ public:
 	void		add_child(ast*);
 	inline int	get_degree()	{ return children.size(); }
 	//inline void set_degree(int d) { degree=d; 
+
 	inline int	get_height()	{ return height; }
 	inline void set_height(int h) { height=h; }
 	inline bool		is_terminal()	{ return terminal; }

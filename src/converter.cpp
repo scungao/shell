@@ -37,7 +37,8 @@ ast* converter::substitute(ast* source, symbol* old, symbol* neo) {
 	return result;
 }
 
-bool converter::get_dreal_solutions(ast* phi, map<symbol*, symbol*>& sol, bool polarity) {
+bool converter::get_dreal_solutions(ast* phi, map<symbol*, 
+									symbol*>& sol, bool polarity) {
 /*
 #include <iostream>
 #include <fstream>
@@ -57,11 +58,11 @@ int main () {
 
 	sol.clear();
 
-	simplify(phi);
+//	simplify(phi);
 	dreal_file << phi->print_smt2(polarity);
 	dreal_file.close();
 
-	system("./dReal --proof --precision 0.01 dreal_file.smt2 &> log");
+	system("./dReal --proof --precision 0.0001 dreal_file.smt2");
 
 	ifstream	dreal_result;
 	dreal_result.open("dreal_file.smt2.proof");

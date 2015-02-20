@@ -1,22 +1,29 @@
 CC = g++
-FLAGS = -O3 
-INCUDE = -I/usr/local/include/boost/
-all: cda 
-cda: main ast table parser converter tester power
-	$(CC) $(FLAGS) main.o ast.o table.o parser.o converter.o tester.o power.o -o cda
-main: main.cpp
-	$(CC) $(FLAGS) -c main.cpp
-power: power.cpp
-	$(CC) $(FLAGS) -c power.cpp
-ast: ast.cpp 
-	$(CC) $(FLAGS) -c ast.cpp
-table: table.cpp
-	$(CC) $(FLAGS) -c table.cpp
-parser: parser.cpp
-	$(CC) $(FLAGS) -c parser.cpp
-tester: tester.cpp
-	$(CC) $(FLAGS) -c tester.cpp
-converter: converter.cpp	
-	$(CC) $(FLAGS) -c converter.cpp
+FLAGS = -O3
+INCUDE = -I./src/
+FB = -ll
+all: shell 
+shell: main ast table converter tester power parser
+	$(CC) $(FLAGS) $(FB) main.o ast.o table.o converter.o lex.yy.o parser.tab.o tester.o power.o -o shell
+main: src/main.cpp
+	$(CC) $(FLAGS) -c src/main.cpp
+power: src/power.cpp
+	$(CC) $(FLAGS) -c src/power.cpp
+ast: src/ast.cpp 
+	$(CC) $(FLAGS) -c src/ast.cpp
+table: src/table.cpp
+	$(CC) $(FLAGS) -c src/table.cpp
+tester: src/tester.cpp
+	$(CC) $(FLAGS) -c src/tester.cpp
+converter: src/converter.cpp	
+	$(CC) $(FLAGS) -c src/converter.cpp
+parser.tab.c parser.tab.h: src/parser.y
+	bison -d src/parser.y
+lex.yy.c: src/lexer.l parser.tab.h
+	flex src/lexer.l
+parser: lex.yy.c parser.tab.c parser.tab.h
+	$(CC) $(FLAGS) -c parser.tab.c lex.yy.c
 clean:
 	rm -rf *.o cda
+
+

@@ -203,6 +203,11 @@ public:
 		return num(s);
 	}
 
+	inline ast* parse_num(char* c) {
+		string s(c);
+		return num(s);
+	}
+
 
 	inline symbol* num_sym(string s) {
 		symbol* new_num = symbol_table->locate_symbol(s);
@@ -233,6 +238,13 @@ public:
 		return a;
 	}
 
+	inline ast* parse_var(char* c) {
+		assert(c!=NULL);
+		string s(c);
+		return var(s);
+	} 
+
+
 	inline ast* param(string s) {
 		symbol* new_param = symbol_table->locate_symbol(s);
 		if (new_param == NULL) {
@@ -251,11 +263,8 @@ public:
 		return result;
 	}
 
-
-
-
-
 };
+
 
 
 #endif

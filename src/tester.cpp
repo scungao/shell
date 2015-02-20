@@ -12,6 +12,141 @@ using namespace std;
 tester::tester(table* st):
 	symbol_table(st), converter(st) {}
 
+
+void tester::testall() {
+	//cout<< test_ast1()->print_prefix()<<endl;
+	//cout<<test_ast2()->print_tree();
+	//cout<< test_ast2()->print_smt2(true)<<endl;
+	//test_ast2();
+	//pwf();
+	//simple();
+	//ipc();
+	//powertest2();
+	//powertest3();
+	ufuk2();
+} 
+
+void tester::ufuk2() {
+	vector<ast*> x;
+	vector<ast*> f;
+
+	x.push_back(var("x1"));
+	x[0] -> set_bounds(-100,100);
+	ast* x1 = x[0];
+
+	x.push_back(var("x2"));
+	x[1] -> set_bounds(-100,100);
+
+	vector<ast*> p;
+
+
+	ast* x2 = x[1];
+
+	ast* f1 = x[1];
+
+	ast* f21 = mul(div(num(1),num(3)),pow(x[0],num(3)));
+	ast* f22 = x[0];
+	ast* f23 = x[1];
+
+	ast* f2 = sub(f21,add(f21,f23));
+
+	ast* a1 = var("a1");
+	//a1 = num(-13);
+	a1 -> set_bounds(-10,8);
+
+	//ast* a2 = num(7);
+	ast* a2 = var("a2");
+	a2 -> set_bounds(5,8);
+
+	//ast* a3 = num(16);
+	ast* a3 = var("a3");
+	a3 -> set_bounds(13,18);
+
+	//ast* a4 = num(-6);
+	ast* a4 = var("a4");
+	a4 -> set_bounds(-4,-7);
+
+	//ast* a5 = num((double)7/6);
+	ast* a5 = var("a5");
+	a5 -> set_bounds(0,1);
+
+	//ast* a6 = num(-3);
+	ast* a6 = var("a6");
+	a6 -> set_bounds(0,5);
+
+	//ast* a7 = num(12);
+	ast* a7 = var("a7");
+	a7 -> set_bounds(10,15);
+
+	//ast* a8 = num((double)-12/3);
+	ast* a8 = var("a8");
+	a8 -> set_bounds(-8,-2);
+	
+	p.push_back(a1);
+	p.push_back(a2);
+	p.push_back(a3);
+	p.push_back(a4);
+	p.push_back(a5);
+	p.push_back(a6);
+	p.push_back(a7);
+	p.push_back(a8);
+
+	ast* B1 = add(a1,mul(a2,pow2(x1)));
+	ast* B2 = add(B1, mul(a3,pow2(x2)) );
+	ast* B3 = add(B2, mul(a4, mul(pow2(x1), pow2(x2)) ) );
+	ast* B4 = add(B3, mul(a5, pow(x1,num(4))));
+	ast* B5 = add(B4, mul(a6, mul(x1, pow(x2, num(3)))));
+	ast* B6 = add(B5, mul(a7, mul(x1,x2)));
+	ast* B7 = add(B6, mul(pow(x1,num(3)),x2));
+
+	ast* B = B7;
+	ast* Bcondition = geq(B,num(0));
+
+	ast* dB1 = mul(partial(B,x1), f1);
+	ast* dB2 = mul(partial(B,x2), f2);
+	ast* dB = add(dB1, dB2);
+	ast* induction = leq(dB,num(0));
+
+	ast* init1 = pow2(sub(x1,num(1.5)));
+	ast* init = leq(add(init1,pow2(x2)),num(0.1));
+
+	ast* unsafe1 = pow2(add(x1,num(1)));
+	ast* unsafe2 = pow2(add(x2,num(1)));
+
+	ast* unsafe = leq(add(unsafe1, unsafe2), num(0.16));
+//	ast* safe = lnot()
+
+	ast* final1 = lor(land(init, lnot(Bcondition)),
+					  land(unsafe, Bcondition));
+
+	ast* final2 = lnot(induction);
+//	ast* final2 = induction;
+	//ast* extra = geq(add(pow2(sub(x1,num(0))),pow2(sub(x2,num(2)))),num(5));
+	ast* final = lor(final1,final2);
+
+	map<symbol*, symbol*> sol;
+	//get_dreal_solutions(final, sol, true);
+
+
+	cegis(lnot(final),x,p,sol,0.1);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void tester::powertest(){
 
 	vector<int> test_size;
@@ -460,9 +595,7 @@ void tester::simple() {
 		cout<<"cegis succeeded"<<endl;
 	}
 	else
-		cout<<"cegies found no solution"<<endl;
-
-
+		cout<<"cegis found no solution"<<endl;
 }
 
 void tester::ufuk() {
@@ -471,16 +604,16 @@ void tester::ufuk() {
 	vector<ast*> p;
 
 	x.push_back(var("x"));
-	x[0]->set_bounds(-9,10);
+	x[0]->set_bounds(-90,0);
 
 	x.push_back(var("y"));
-	x[1]->set_bounds(-9,10);
+	x[1]->set_bounds(-90,0);
 
 	x.push_back(var("z"));
-	x[2]->set_bounds(-9,10);
+	x[2]->set_bounds(-90,0);
 
 	p.push_back(var("gamma"));
-	p[0]->set_bounds(-9,10);
+	p[0]->set_bounds(-9,0.5);
 
 	p.push_back(var("a"));
 	p[1]->set_bounds(-9,10);
@@ -504,7 +637,7 @@ void tester::ufuk() {
 
 	ast* v = add(
 				add(mul(p[1],pow(x[0],num(2))),mul(p[3],mul(x[0],x[1]))),
-				mul(p[2],pow(x[0],num(2)))
+				mul(p[2],pow(x[1],num(2)))
 				);
 
 	ast* dv = add(mul(partial(v,x[0]),fx),mul(partial(v,x[1]),fy));
@@ -516,7 +649,7 @@ void tester::ufuk() {
 
 	map<symbol*, symbol*> sol;
 
-	if (cegis(final, x, p, sol, 0.01)) {
+	if (cegis(final, x, p, sol, 0.1)) {
 		cout<<"cegis finished"<<endl;
 	}
 	else
@@ -677,15 +810,4 @@ void tester::cubli() {
 }
 
 
-void tester::testall() {
-	//cout<< test_ast1()->print_prefix()<<endl;
-	//cout<<test_ast2()->print_tree();
-	//cout<< test_ast2()->print_smt2(true)<<endl;
-	//test_ast2();
-	//pwf();
-	//simple();
-	//ipc();
-	//powertest2();
-	//powertest3();
-	ufuk();
-} 
+
