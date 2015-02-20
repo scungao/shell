@@ -21,7 +21,7 @@ void yyerror(const char *s);
   char* cstr;
   double real;
   int nat;
-  ast*  tree;
+//  ast*  tree;
 }
 
 /* declare tokens */ 
@@ -55,7 +55,7 @@ term: SYM
     string s = to_string($1);
     cout<<s;
 
-    ast* = new ast;
+    ast* a = new ast;
     woods->num("1");
 
     $$ = $1;
