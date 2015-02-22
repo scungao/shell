@@ -22,11 +22,10 @@ table::table() {
 	add(new symbol("<=", relation, 2));
 	add(new symbol("=", relation, 2));
 	add(new symbol("true", relation, 0));
+	add(new symbol("false", relation, 0));
 
 	add(new symbol("(", aux, 0));
 	add(new symbol(")", aux, 0));
-	add(new symbol(" ", aux, 0));
-	add(new symbol("\t", aux, 0));
 
 	add(new symbol("d/dt", sfunction, 1));
 
@@ -58,3 +57,23 @@ symbol* table::locate_symbol(string name) {
 	else 
 		return NULL;
 }
+
+
+ast* table::locate_label(string name) {
+	map<string, ast*>::iterator	loc;
+	loc = label_table.find(name);
+	if (loc!=label_table.end()) 
+		return loc -> second;
+	else 
+		return NULL;
+}
+
+void table::update_label(string s, ast* a) {
+	map<string, ast*>::iterator	loc;
+	loc = label_table.find(s);
+	assert(loc!= label_table.end());
+	loc->second = a;
+}
+
+
+

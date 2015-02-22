@@ -188,6 +188,11 @@ public:
 		return a;		
 	} 
 
+	inline ast* bot() {
+		ast* a = new ast(symbol_table->locate_symbol("false"));
+		return a;		
+	} 
+
 	inline ast* num(string s) {
 		symbol* new_num = symbol_table->locate_symbol(s);
 		if (new_num == NULL){ 
@@ -238,16 +243,19 @@ public:
 		return a;
 	}
 
-	inline ast* mklabel(string s) {
-		symbol* new_label = symbol_table->locate_symbol(s);
-		if (new_label == NULL) {
-			new_label = new symbol(s, label, 1);
-			symbol_table -> add(new_label);
+	inline void mklabel(string s, ast* a) {
+		ast* a_old = symbol_table->locate_label(s);
+		if ( a_old == NULL) {
+			symbol_table -> add_label(s, a);
 		}
-		ast* a = new ast(new_label);
-		return a;
+		else {
+			symbol_table -> update_label(s, a);
+		}
 	}
 
+	inline ast* find_label(string s) {
+		return symbol_table -> locate_label(s);
+	}
 
 	inline bool is_var(string s) {
 		symbol* holder = symbol_table->locate_symbol(s);
@@ -258,6 +266,10 @@ public:
 			return false;
 		}
 
+	}
+
+	inline bool is_formula(ast* a) {
+		return (a->get_head_type()==formula);
 	}
 
 	inline ast* parse_var(char* c) {
