@@ -17,8 +17,9 @@
 "<=" { return LEQ; }
 ">=" { return GEQ; }
 ":=" { return CEQ; }
-[0-9]+ { yylval.nat = atoi(yytext); return NUM; } 
-[a-zA-Z]+ { yylval.cstr = yytext; return SYM; }
+"quit" { return QUIT; }
+"-"?((([0-9]+)|([0-9]*\.?[0-9]+))([eE][-+]?[0-9]+)?) { yylval.real = atof(yytext); return NUM; }
+[a-zA-Z~!@\$\%\^&\*_\-\+=\<\>\.\?\/'][a-zA-Z0-9~!@\$\%\^&\*_\-\+=\<\>\.\?\/']*  { yylval.cstr = strdup(yytext); return SYM; }
 \n  { return EOL; }
 [ \t]	;
 .	{ printf("error: %c\n", *yytext); }

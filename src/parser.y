@@ -11,27 +11,28 @@ extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
 
-extern converter woods;
+extern converter* operators;
 
 void yyerror(const char *s);
 %}
 
 %union 
 {
+  string* str;
   char* cstr;
   double real;
   int nat;
-//  ast*  tree;
+  ast*  tree;
 }
 
 /* declare tokens */ 
 %token NUM SYM
 %token ADD SUB MUL DIV 
 %token EQ LEQ GEQ LT GT CEQ
-%token EOL
+%token EOL QUIT
 
-%type <cstr> SYM
-%type <nat> NUM command
+%type <cstr> SYM QUIT
+%type <nat> NUM
 %type <tree> term 
 
 %left ADD SUB
@@ -39,28 +40,37 @@ void yyerror(const char *s);
 %left EXP SIN COS TAN LOG
 //%nonassoc UMINUS
 
-%start  script
+//%start  script
 
 %%
-
+/*
 script: command_list
   ;
 
 command_list: command EOL
   | command_list command EOL
+  | EOL
   ;
 
-term: SYM
-  | NUM { 
-    string s = to_string($1);
-    cout<<s;
-
-    ast* a = new ast;
-    woods->num("1");
-
-    $$ = $1;
-
+command: 
+  | assignment 
+  | QUIT {
+    return 0;
   }
+  ;
+
+assignment:
+  | SYM CEQ term
+  | SYM CEQ NUM
+  ;
+*/
+term: 
+  SYM {
+    string name($1);
+    $$ = operators->var(name);
+    delete $1;
+  }
+  | NUM
   | term ADD term
   | term SUB term
   | term MUL term
@@ -68,12 +78,6 @@ term: SYM
   | SIN '(' term ')'
   | COS '(' term ')'
   | '(' term ')'
-  ;
-
-command: 
-  | EOL {
-    return 0;
-  }
   ;
 
 /*

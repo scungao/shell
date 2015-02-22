@@ -1,7 +1,7 @@
 CC = g++
 FLAGS = -O3
 INCUDE = -I./src/
-FB = -ll
+FB = -ly -ll
 all: shell 
 shell: main ast table converter tester power parser
 	$(CC) $(FLAGS) $(FB) main.o ast.o table.o converter.o lex.yy.o parser.tab.o tester.o power.o -o shell
@@ -22,7 +22,7 @@ parser.tab.c parser.tab.h: src/parser.y
 lex.yy.c: src/lexer.l parser.tab.h
 	flex src/lexer.l
 parser: lex.yy.c parser.tab.c parser.tab.h
-	$(CC) $(FLAGS) -c parser.tab.c lex.yy.c
+	$(CC) $(FLAGS) -c lex.yy.c parser.tab.c
 clean:
 	rm -rf *.o cda
 

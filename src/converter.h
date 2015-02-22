@@ -238,6 +238,28 @@ public:
 		return a;
 	}
 
+	inline ast* mklabel(string s) {
+		symbol* new_label = symbol_table->locate_symbol(s);
+		if (new_label == NULL) {
+			new_label = new symbol(s, label, 1);
+			symbol_table -> add(new_label);
+		}
+		ast* a = new ast(new_label);
+		return a;
+	}
+
+
+	inline bool is_var(string s) {
+		symbol* holder = symbol_table->locate_symbol(s);
+		if (holder!= NULL) {
+			return holder -> get_stype() == variable;
+		}
+		else {
+			return false;
+		}
+
+	}
+
 	inline ast* parse_var(char* c) {
 		assert(c!=NULL);
 		string s(c);

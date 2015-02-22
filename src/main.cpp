@@ -14,10 +14,9 @@ extern "C" FILE *yyin;
 inline void reply(string s) { cout<<"\033[36m"<<s<<"."<<"\033[0m"<<"\n"; }
 
 int main() {
-	table	full_table;
-	converter woods(&full_table);
-	tester	test_suite(&full_table);
-
+	table*	full_table = new table;
+	converter* operators = new converter(full_table);
+//	tester	test_suite(&full_table);
 	yyparse();
 
 	return 0;
