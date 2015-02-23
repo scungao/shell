@@ -11,8 +11,8 @@ extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
 
-table*  full_table = new table;
-converter* operators = new converter(full_table);
+extern table* full_table;
+extern converter* operators;
 
 void yyerror(const char *s);
 %}
@@ -30,7 +30,8 @@ void yyerror(const char *s);
 %token ADD SUB MUL DIV 
 %token EQ LEQ GEQ LT GT CEQ
 %token AND OR NOT IMP BOT TOP
-%token EOL QUIT SOLVE
+%token EOL QUIT SOLVE DEF
+%token LP LB RP RB COMMA
 
 %type <cstr> SYM QUIT
 %type <real> NUM
@@ -58,11 +59,30 @@ command_list: command EOL
   | EOL
   ;
 
-command: 
-  assignment 
+command: declaration 
+  | assignment 
   | action
-  | QUIT {
-    return 0;
+  ;
+
+declaration: LB NUM COMMA NUM RB SYM {
+    string s($6);
+    ast* a = operators -> var(s);
+    a -> set_bounds($2, $4);
+  }
+  | LB NUM NUM RB SYM {
+    string s($5);
+    ast* a = operators -> var(s);
+    a -> set_bounds($2, $3);
+  }
+  | LB NUM RB SYM {
+    string s($4);
+    ast* a = operators -> num($2);
+    operators -> mklabel(s, a);
+  }
+  | DEF SYM NUM {
+    string s($2);
+    ast* a = operators -> num($3);
+    operators -> mklabel(s, a);    
   }
   ;
 
@@ -94,10 +114,18 @@ action: SOLVE formula
 
 term: 
   SYM {
-    string name($1);
-    ast* a = 
-    $$ = operators->var(name);
-    delete $1;
+    string s($1);
+    ast* a = operators -> get_var(s);
+    if (a!=NULL) {
+      $$ = a;
+    }
+    else {
+      a = operators -> find_label(s);
+      if (a!=NULL && operators -> is_term(a))
+        $$ = a;
+      else
+        cout<<"label error\n";
+    }
   }
   | NUM {
     $$ = operators->num($1);    
@@ -114,19 +142,19 @@ term:
   | term DIV term {
     $$ = operators->div($1, $3);
   }
-  | SIN '(' term ')' {
+  | SIN LP term RP {
     $$ = operators->sin($3);
   }
-  | COS '(' term ')' {
+  | COS LP term RP {
     $$ = operators->cos($3);
   }
-  | TAN '(' term ')' {  
+  | TAN LP term RP {  
     $$ = operators->tan($3);
   }
   | term POW term {
     $$ = operators -> pow($1, $3);
   }
-  | '(' term ')' {
+  | LP term RP {
     $$ = $2;
   }
   ;

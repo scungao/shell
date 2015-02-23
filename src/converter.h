@@ -268,8 +268,22 @@ public:
 
 	}
 
+	inline ast* get_var(string s) {
+		symbol* holder = symbol_table->locate_symbol(s);
+		if (holder!= NULL) {
+			if (holder -> get_stype() == variable)
+				return var(s);
+		}
+		return NULL;
+	}
+
+
 	inline bool is_formula(ast* a) {
 		return (a->get_head_type()==formula);
+	}
+
+	inline bool is_term(ast* a) {
+		return (a->get_head_type() == term);
 	}
 
 	inline ast* parse_var(char* c) {

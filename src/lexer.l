@@ -18,6 +18,7 @@
 "<=" { return LEQ; }
 ">=" { return GEQ; }
 ":=" { return CEQ; }
+"#define" { return DEF; }
 
 "and" { return AND; }
 "or"  { return OR; }
@@ -29,8 +30,14 @@
 "solve" { return SOLVE; }
 "quit" { return QUIT; }
 
+"[" { return LB; }
+"]" { return RB; }
+"(" { return LP; }
+")" { return RP; }
+"," { return COMMA; }
+
 "-"?((([0-9]+)|([0-9]*\.?[0-9]+))([eE][-+]?[0-9]+)?) { yylval.real = atof(yytext); return NUM; }
-[a-zA-Z_][a-zA-Z0-9~!\$_\.']*  { yylval.cstr = strdup(yytext); return SYM; }
+[a-zA-Z_][a-zA-Z0-9~!\$_']*  { yylval.cstr = strdup(yytext); return SYM; }
 \n  { return EOL; }
 [ \t]	;
 .	{ printf("error: %c\n", *yytext); }

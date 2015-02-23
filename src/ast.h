@@ -48,6 +48,14 @@ public:
 				return other;
 		}
 	}
+	inline bool is_formula() {
+		return (get_head_type()==formula);
+	}
+
+	inline bool is_term() {
+		return (get_head_type() == term);
+	}
+
 	inline symbol*	get_head_symbol()	{ return head_symbol; }
 	inline bool	compare_head_symbol(symbol* s) 
 		{ return s == get_head_symbol(); }

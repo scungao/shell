@@ -11,19 +11,23 @@ extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
 
+table*  full_table = new table;
+converter* operators = new converter(full_table);
+
 inline void reply(string s) { cout<<"\033[36m"<<s<<"."<<"\033[0m"<<"\n"; }
 
 int main() {
 //	tester	test_suite(&full_table);
-	yyparse();
-	return 0;
-}
-/*
-//	test_suite.testall();
+//	yyparse();
 //	return 0;
 
-//needs nothing below for now
-	cout<<"\033[36m"<<"cda$ "<<"\033[0m";
+//	test_suite.testall();
+//	return 0;
+	char current_char;
+	string command;
+	string subcommand;
+
+	cout<<"\033[36m"<<"dReal$ "<<"\033[0m";
 	cin.get(current_char);
 
 	while (current_char != EOF) {
@@ -32,7 +36,7 @@ int main() {
 			command += current_char;
 		else {
 			command.clear();
-			cout<<"\033[36m"<<"cda$ "<<"\033[0m";
+			cout<<"\033[36m"<<"dReal$ "<<"\033[0m";
 		}
 
 		if ( command.compare("quit") == 0 || command.compare("exit") == 0 
@@ -40,7 +44,7 @@ int main() {
 			break;
 		}
 		else if ( command.compare("test") == 0) {
-			test_suite.testall();
+			//test_suite.testall();
 		}
 		else if ( command.compare("print")==0) {
 			subcommand.clear();
@@ -50,6 +54,7 @@ int main() {
 					subcommand += current_char;
 			} while(current_char!='\n');
 			//full_table.locate_symbol(current_char)->get_name();
+			cout<<subcommand<<endl;
 			continue;
 		}
 		else if ( command.compare("variable") == 0 ) {
@@ -85,5 +90,5 @@ int main() {
 	reply("Normal exit");
 	return 0;
 }
-*/
+
 

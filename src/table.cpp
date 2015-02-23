@@ -58,7 +58,6 @@ symbol* table::locate_symbol(string name) {
 		return NULL;
 }
 
-
 ast* table::locate_label(string name) {
 	map<string, ast*>::iterator	loc;
 	loc = label_table.find(name);
